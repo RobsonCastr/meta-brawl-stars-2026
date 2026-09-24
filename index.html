@@ -1,0 +1,834 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Brawl Stars Meta Tracker - Mapas & Brawlers</title>
+  <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-dark: #0a0c14;
+      --bg-card: #141824;
+      --bg-card-hover: #1c2235;
+      --accent-yellow: #ffcc00;
+      --accent-cyan: #00f0ff;
+      --tier-s: #ff4757;
+      --tier-a: #ffa502;
+      --tier-b: #2ed573;
+      --tier-c: #3498db;
+      --tier-d: #95a5a6;
+      --text-main: #ffffff;
+      --text-muted: #8e9bb0;
+      --border-color: rgba(255, 255, 255, 0.1);
+      --radius: 12px;
+      --shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      font-family: 'Roboto', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* HEADER & HERO */
+    header {
+      background: linear-gradient(180deg, #181c2e 0%, var(--bg-dark) 100%);
+      padding: 2rem 1rem;
+      border-bottom: 1px solid var(--border-color);
+      text-align: center;
+    }
+
+    .brand {
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 2.8rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: var(--accent-yellow);
+      text-shadow: 0 0 15px rgba(255, 204, 0, 0.4);
+      margin-bottom: 0.5rem;
+    }
+
+    .subtitle {
+      color: var(--text-muted);
+      font-size: 1rem;
+      margin-bottom: 1.5rem;
+    }
+
+    /* ABAS PRINCIPAIS (TABS) */
+    .main-tabs {
+      display: flex;
+      justify-content: center;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .tab-btn {
+      background: transparent;
+      border: 1px solid var(--border-color);
+      color: var(--text-muted);
+      padding: 0.5rem 1.5rem;
+      border-radius: 8px;
+      cursor: pointer;
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 1.1rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      transition: all 0.3s ease;
+    }
+
+    .tab-btn.active {
+      background: var(--accent-cyan);
+      color: #000;
+      border-color: var(--accent-cyan);
+      box-shadow: 0 0 10px rgba(0, 240, 255, 0.4);
+    }
+
+    /* CONTROLES */
+    .controls-container {
+      max-width: 1100px;
+      margin: 0 auto;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0 1rem;
+    }
+
+    .search-bar {
+      position: relative;
+      flex: 1;
+      min-width: 250px;
+    }
+
+    .search-bar input {
+      width: 100%;
+      padding: 0.8rem 1.2rem;
+      border-radius: 25px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+      font-size: 0.95rem;
+      outline: none;
+      transition: all 0.3s ease;
+    }
+
+    .search-bar input:focus {
+      border-color: var(--accent-cyan);
+      box-shadow: 0 0 10px rgba(0, 240, 255, 0.3);
+    }
+
+    .filter-group {
+      display: flex;
+      gap: 0.5rem;
+      overflow-x: auto;
+      padding-bottom: 0.5rem;
+    }
+
+    .filter-btn {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      color: var(--text-muted);
+      padding: 0.6rem 1.2rem;
+      border-radius: 20px;
+      cursor: pointer;
+      font-family: 'Rajdhani', sans-serif;
+      font-weight: 600;
+      font-size: 0.95rem;
+      text-transform: uppercase;
+      white-space: nowrap;
+      transition: all 0.2s ease;
+    }
+
+    .filter-btn:hover, .filter-btn.active {
+      background: var(--accent-yellow);
+      color: #000;
+      border-color: var(--accent-yellow);
+      box-shadow: 0 0 10px rgba(255, 204, 0, 0.4);
+    }
+
+    /* MAIN CONTAINER */
+    main {
+      max-width: 1100px;
+      margin: 2rem auto;
+      padding: 0 1rem;
+      flex: 1;
+      width: 100%;
+    }
+
+    .section-view {
+      display: none;
+    }
+
+    .section-view.active {
+      display: block;
+    }
+
+    .grid-maps {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 1.5rem;
+    }
+
+    /* MAP CARD */
+    .map-card {
+      background: var(--bg-card);
+      border-radius: var(--radius);
+      border: 1px solid var(--border-color);
+      overflow: hidden;
+      cursor: pointer;
+      transition: transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .map-card:hover {
+      transform: translateY(-5px);
+      border-color: var(--accent-cyan);
+      box-shadow: var(--shadow);
+      background: var(--bg-card-hover);
+    }
+
+    .map-header {
+      padding: 1rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .map-name {
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 1.4rem;
+      font-weight: 700;
+    }
+
+    .mode-badge {
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      padding: 0.3rem 0.6rem;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    .mode-pique-gema { color: #a55eea; }
+    .mode-fute-brawl { color: #26de81; }
+    .mode-nocaute { color: #ff6b6b; }
+    .mode-duelos { color: #ffbe76; }
+
+    .map-body {
+      padding: 1rem;
+      flex: 1;
+    }
+
+    .top-tier-preview {
+      margin-top: 0.5rem;
+    }
+
+    .top-tier-label {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 0.5rem;
+    }
+
+    .brawlers-pills {
+      display: flex;
+      gap: 0.4rem;
+      flex-wrap: wrap;
+    }
+
+    .pill {
+      background: rgba(255, 71, 87, 0.2);
+      color: var(--tier-s);
+      border: 1px solid var(--tier-s);
+      padding: 0.2rem 0.6rem;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      font-weight: 700;
+    }
+
+    /* LISTA GERAL DE BRAWLERS */
+    .brawlers-tier-container {
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    .tier-group-box {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius);
+      padding: 1.2rem;
+    }
+
+    .tier-group-header {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 1rem;
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 0.5rem;
+    }
+
+    .tier-title-badge {
+      width: 35px;
+      height: 35px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Rajdhani', sans-serif;
+      font-weight: 700;
+      font-size: 1.2rem;
+      border-radius: 6px;
+      color: #fff;
+    }
+
+    .brawler-cards-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 0.8rem;
+    }
+
+    .brawler-item-card {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--border-color);
+      padding: 0.8rem;
+      border-radius: 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 0.2rem;
+    }
+
+    .brawler-item-name {
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 1.1rem;
+      font-weight: 700;
+    }
+
+    .brawler-item-role {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+    }
+
+    /* MODAL DETALHES */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.85);
+      backdrop-filter: blur(5px);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+      z-index: 1000;
+    }
+
+    .modal-overlay.active {
+      opacity: 1;
+      pointer-events: all;
+    }
+
+    .modal-content {
+      background: var(--bg-card);
+      width: 90%;
+      max-width: 700px;
+      max-height: 90vh;
+      border-radius: var(--radius);
+      border: 1px solid var(--accent-cyan);
+      box-shadow: 0 0 20px rgba(0, 240, 255, 0.2);
+      overflow-y: auto;
+      padding: 2rem;
+      position: relative;
+    }
+
+    .close-btn {
+      position: absolute;
+      top: 1rem;
+      right: 1.5rem;
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      font-size: 2rem;
+      cursor: pointer;
+    }
+
+    .close-btn:hover { color: #fff; }
+
+    .modal-title {
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 2rem;
+      color: var(--accent-yellow);
+      margin-bottom: 0.2rem;
+    }
+
+    .tier-section {
+      margin: 1.5rem 0;
+    }
+
+    .tier-row {
+      display: flex;
+      align-items: center;
+      margin-bottom: 0.8rem;
+      background: rgba(255, 255, 255, 0.03);
+      padding: 0.6rem;
+      border-radius: 8px;
+    }
+
+    .tier-badge {
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Rajdhani', sans-serif;
+      font-weight: 700;
+      font-size: 1.4rem;
+      border-radius: 6px;
+      margin-right: 1rem;
+    }
+
+    .badge-s { background: var(--tier-s); color: #fff; }
+    .badge-a { background: var(--tier-a); color: #fff; }
+    .badge-b { background: var(--tier-b); color: #fff; }
+
+    .strategy-box {
+      background: rgba(0, 240, 255, 0.05);
+      border-left: 4px solid var(--accent-cyan);
+      padding: 1rem;
+      border-radius: 0 8px 8px 0;
+      margin-top: 1rem;
+      font-size: 0.95rem;
+      line-height: 1.5;
+    }
+
+    footer {
+      text-align: center;
+      padding: 1.5rem;
+      color: var(--text-muted);
+      border-top: 1px solid var(--border-color);
+      font-size: 0.85rem;
+      margin-top: 2rem;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="brand">BRAWL META PRO</div>
+    <div class="subtitle">Guia Estratégico de Mapas & Tier List de Brawlers</div>
+    
+    <!-- ABAS DE NAVEGAÇÃO -->
+    <div class="main-tabs">
+      <button class="tab-btn active" id="tabMaps" onclick="switchTab('maps')">Mapas & Estratégias</button>
+      <button class="tab-btn" id="tabBrawlers" onclick="switchTab('brawlers')">Todos os Brawlers</button>
+    </div>
+
+    <!-- CONTROLES (Muda dependendo da aba) -->
+    <div class="controls-container" id="controlsMaps">
+      <div class="search-bar">
+        <input type="text" id="searchInput" placeholder="Pesquisar mapa...">
+      </div>
+      <div class="filter-group" id="filterGroup">
+        <button class="filter-btn active" data-mode="all">Todos</button>
+        <button class="filter-btn" data-mode="Pique-Gema">Pique-Gema</button>
+        <button class="filter-btn" data-mode="Fute-Brawl">Fute-Brawl</button>
+        <button class="filter-btn" data-mode="Nocaute">Nocaute</button>
+        <button class="filter-btn" data-mode="Duelos">Duelos</button>
+      </div>
+    </div>
+
+    <div class="controls-container" id="controlsBrawlers" style="display: none;">
+      <div class="search-bar" style="width: 100%;">
+        <input type="text" id="searchBrawlerInput" placeholder="Pesquisar brawler pelo nome...">
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <!-- SEÇÃO DE MAPAS -->
+    <section id="sectionMaps" class="section-view active">
+      <div class="grid-maps" id="mapsGrid">
+        <!-- Renderizado via JS -->
+      </div>
+    </section>
+
+    <!-- SEÇÃO DE TODOS OS BRAWLERS -->
+    <section id="sectionBrawlers" class="section-view">
+      <div class="brawlers-tier-container" id="brawlersTierContainer">
+        <!-- Renderizado via JS -->
+      </div>
+    </section>
+  </main>
+
+  <!-- Modal de Detalhes dos Mapas -->
+  <div class="modal-overlay" id="modalOverlay">
+    <div class="modal-content">
+      <button class="close-btn" id="closeModal">&times;</button>
+      <h2 class="modal-title" id="modalMapName">Nome do Mapa</h2>
+      <div class="mode-badge" id="modalModeBadge">Modo</div>
+      
+      <div class="tier-section">
+        <div class="tier-row">
+          <div class="tier-badge badge-s">S</div>
+          <div class="brawlers-pills" id="modalTierS"></div>
+        </div>
+        <div class="tier-row">
+          <div class="tier-badge badge-a">A</div>
+          <div class="brawlers-pills" id="modalTierA"></div>
+        </div>
+        <div class="tier-row">
+          <div class="tier-badge badge-b">B</div>
+          <div class="brawlers-pills" id="modalTierB"></div>
+        </div>
+      </div>
+
+      <div class="strategy-box">
+        <strong>Estratégia do Mapa:</strong>
+        <p id="modalStrategy">Dicas e dinâmicas de jogo...</p>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <p>Brawl Meta Pro - Guia de Meta e Brawlers do Brawl Stars.</p>
+  </footer>
+
+  <script>
+    // BASE DE DADOS DOS MAPAS
+    const mapsData = [
+      {
+        id: 1,
+        name: "Mina Rochosa",
+        mode: "Pique-Gema",
+        modeClass: "mode-pique-gema",
+        tierS: ["Gene", "Carl", "Tara"],
+        tierA: ["Emz", "Crow", "Squeak"],
+        tierB: ["Rosa", "Poco", "Bo"],
+        strategy: "Mantenha o controle da área central. O Carregador de Gemas (Mid) deve jogar de forma recuada e segura. Utilize as laterais para aplicar pressão constante no time adversário."
+      },
+      {
+        id: 2,
+        name: "Estádio Sneaky",
+        mode: "Fute-Brawl",
+        modeClass: "mode-fute-brawl",
+        tierS: ["Rico", "Stu", "Buster"],
+        tierA: ["Max", "El Primo", "Fang"],
+        tierB: ["Darryl", "Bea", "Gale"],
+        strategy: "Use brawlers capazes de quebrar arbustos e paredes. Rico domina as paredes laterais aproveitando seus tiros com ricochete."
+      },
+      {
+        id: 3,
+        name: "Tiro Certo",
+        mode: "Nocaute",
+        modeClass: "mode-nocaute",
+        tierS: ["Piper", "Nani", "Angelo"],
+        tierA: ["Mandy", "Brock", "Belle"],
+        tierB: ["Tick", "Byron", "Gene"],
+        strategy: "No modo Nocaute neste mapa aberto, snipers e atiradores de longo alcance têm vantagem total. Mantenha distância e evite eliminações precoces."
+      },
+      {
+        id: 4,
+        name: "Besouros Duetos",
+        mode: "Duelos",
+        modeClass: "mode-duelos",
+        tierS: ["Stu", "Edgar", "Meg"],
+        tierA: ["Charlie", "Cordelius", "Spike"],
+        tierB: ["Pearl", "Leon", "Surge"],
+        strategy: "No modo Duelos, escolha uma ordem equilibrada de Brawlers 1v1. O seu primeiro Brawler precisa ser forte no x1 para garantir a vantagem logo no início."
+      }
+    ];
+
+    // BASE DE DADOS DE TODOS OS BRAWLERS
+    const todosOsBrawlersMeta = [
+      // TIER S
+      { nome: "Wendy", tier: "S", funcao: "Suporte" },
+      { nome: "Cosmo", tier: "S", funcao: "Controlador" },
+      { nome: "Bolt", tier: "S", funcao: "Tanque" },
+      { nome: "Shade", tier: "S", funcao: "Assassino" },
+      { nome: "Gus", tier: "S", funcao: "Suporte" },
+      { nome: "Amber", tier: "S", funcao: "Controladora" },
+      { nome: "Rico", tier: "S", funcao: "Disparador" },
+      { nome: "Griff", tier: "S", funcao: "Lutador" },
+      { nome: "El Primo", tier: "S", funcao: "Tanque" },
+      { nome: "Max", tier: "S", funcao: "Suporte" },
+      { nome: "Mortis", tier: "S", funcao: "Assassino" },
+
+      // TIER A
+      { nome: "Nori", tier: "A", funcao: "Assassino" },
+      { nome: "Starr Nova", tier: "A", funcao: "Assassino" },
+      { nome: "Edgar", tier: "A", funcao: "Assassino" },
+      { nome: "Colette", tier: "A", funcao: "Destruidora de Tanques" },
+      { nome: "Maisie", tier: "A", funcao: "Controladora" },
+      { nome: "Colt", tier: "A", funcao: "Disparador" },
+      { nome: "Mandy", tier: "A", funcao: "Disparador" },
+      { nome: "Bo", tier: "A", funcao: "Controlador" },
+      { nome: "Eve", tier: "A", funcao: "Artilheira" },
+      { nome: "Surge", tier: "A", funcao: "Lutador" },
+      { nome: "Juju", tier: "A", funcao: "Controladora" },
+      { nome: "Lumi", tier: "A", funcao: "Disparador" },
+      { nome: "Byron", tier: "A", funcao: "Suporte" },
+      { nome: "Trunk", tier: "A", funcao: "Tanque" },
+      { nome: "Angelo", tier: "A", funcao: "Franco-Atirador" },
+      { nome: "Piper", tier: "A", funcao: "Franco-Atirador" },
+      { nome: "Pierce", tier: "A", funcao: "Controlador" },
+      { nome: "Alli", tier: "A", funcao: "Assassino" },
+      { nome: "Bibi", tier: "A", funcao: "Lutadora" },
+      { nome: "Chester", tier: "A", funcao: "Lutador" },
+      { nome: "Crow", tier: "A", funcao: "Assassino" },
+      { nome: "Brock", tier: "A", funcao: "Franco-Atirador" },
+
+      // TIER B
+      { nome: "Stu", tier: "B", funcao: "Assassino" },
+      { nome: "Buzz", tier: "B", funcao: "Assassino" },
+      { nome: "Emz", tier: "B", funcao: "Controladora" },
+      { nome: "Janet", tier: "B", funcao: "Franco-Atirador" },
+      { nome: "8-Bit", tier: "B", funcao: "Disparador" },
+      { nome: "Belle", tier: "B", funcao: "Franco-Atirador" },
+      { nome: "Mina", tier: "B", funcao: "Controladora" },
+      { nome: "Meeple", tier: "B", funcao: "Lutador" },
+      { nome: "Melodie", tier: "B", funcao: "Assassino" },
+      { nome: "Otis", tier: "B", funcao: "Controlador" },
+      { nome: "Bull", tier: "B", funcao: "Tanque" },
+      { nome: "Lou", tier: "B", funcao: "Controlador" },
+      { nome: "Charlie", tier: "B", funcao: "Controladora" },
+      { nome: "Grom", tier: "B", funcao: "Artilheiro" },
+      { nome: "Gigi", tier: "B", funcao: "Assassino" },
+      { nome: "Poco", tier: "B", funcao: "Suporte" },
+      { nome: "Shelly", tier: "B", funcao: "Lutadora" },
+      { nome: "Willow", tier: "B", funcao: "Controladora" },
+      { nome: "Sandy", tier: "B", funcao: "Controlador" },
+      { nome: "Ash", tier: "B", funcao: "Tanque" },
+      { nome: "Cordelius", tier: "B", funcao: "Assassino" },
+      { nome: "Sirius", tier: "B", funcao: "Controlador" },
+      { nome: "Kenji", tier: "B", funcao: "Assassino" },
+
+      // TIER C
+      { nome: "Meg", tier: "C", funcao: "Tanque" },
+      { nome: "Pearl", tier: "C", funcao: "Lutadora" },
+      { nome: "Spike", tier: "C", funcao: "Controlador" },
+      { nome: "Ollie", tier: "C", funcao: "Lutador" },
+      { nome: "Larry & Lawrie", tier: "C", funcao: "Artilheiros" },
+      { nome: "R-T", tier: "C", funcao: "Controlador" },
+      { nome: "Bea", tier: "C", funcao: "Franco-Atirador" },
+      { nome: "Gale", tier: "C", funcao: "Controlador" },
+      { nome: "Penny", tier: "C", funcao: "Controladora" },
+      { nome: "Lily", tier: "C", funcao: "Assassino" },
+      { nome: "Ziggy", tier: "C", funcao: "Controlador" },
+      { nome: "Berry", tier: "C", funcao: "Suporte" },
+      { nome: "Clancy", tier: "C", funcao: "Lutador" },
+      { nome: "Buster", tier: "C", funcao: "Tanque" },
+      { nome: "Frank", tier: "C", funcao: "Tanque" },
+      { nome: "Chuck", tier: "C", funcao: "Controlador" },
+      { nome: "Glowy", tier: "C", funcao: "Controlador" },
+      { nome: "Sam", tier: "C", funcao: "Lutador" },
+
+      // TIER D
+      { nome: "Moe", tier: "D", funcao: "Lutador" },
+      { nome: "Kit", tier: "D", funcao: "Suporte / Assassino" },
+      { nome: "Hank", tier: "D", funcao: "Tanque" },
+      { nome: "Doug", tier: "D", funcao: "Suporte" },
+      { nome: "Darryl", tier: "D", funcao: "Tanque" },
+      { nome: "Dynamike", tier: "D", funcao: "Artilheiro" },
+      { nome: "Tick", tier: "D", funcao: "Artilheiro" },
+      { nome: "Mr. P", tier: "D", funcao: "Controlador" },
+      { nome: "Nita", tier: "D", funcao: "Lutadora" },
+      { nome: "Rosa", tier: "D", funcao: "Tanque" },
+      { nome: "Jacky", tier: "D", funcao: "Tanque" },
+      { nome: "Carl", tier: "D", funcao: "Lutador" },
+      { nome: "Barley", tier: "D", funcao: "Artilheiro" },
+      { nome: "Ruffs", tier: "D", funcao: "Suporte" },
+      { nome: "Pam", tier: "D", funcao: "Suporte" },
+      { nome: "Gene", tier: "D", funcao: "Controlador" },
+      { nome: "Tara", tier: "D", funcao: "Controladora" },
+      { nome: "Squeak", tier: "D", funcao: "Controlador" },
+      { nome: "Fang", tier: "D", funcao: "Assassino" },
+      { nome: "Lola", tier: "D", funcao: "Disparador" },
+      { nome: "Bonnie", tier: "D", funcao: "Franco-Atirador / Tanque" },
+      { nome: "Mico", tier: "D", funcao: "Assassino" },
+      { nome: "Draco", tier: "D", funcao: "Tanque" },
+      { nome: "Vince", tier: "D", funcao: "Controlador" },
+      { nome: "Finx", tier: "D", funcao: "Disparador" },
+      { nome: "Damian", tier: "D", funcao: "Tanque" },
+      { nome: "Najia", tier: "D", funcao: "Controladora" },
+      { nome: "Nani", tier: "D", funcao: "Franco-Atirador" },
+      { nome: "Gray", tier: "D", funcao: "Suporte" },
+      { nome: "Jae-yong", tier: "D", funcao: "Lutador" }
+    ];
+
+    // CONTROLE DE ABAS (TABS)
+    function switchTab(tabName) {
+      const tabMaps = document.getElementById('tabMaps');
+      const tabBrawlers = document.getElementById('tabBrawlers');
+      const sectionMaps = document.getElementById('sectionMaps');
+      const sectionBrawlers = document.getElementById('sectionBrawlers');
+      const controlsMaps = document.getElementById('controlsMaps');
+      const controlsBrawlers = document.getElementById('controlsBrawlers');
+
+      if (tabName === 'maps') {
+        tabMaps.classList.add('active');
+        tabBrawlers.classList.remove('active');
+        sectionMaps.classList.add('active');
+        sectionBrawlers.classList.remove('active');
+        controlsMaps.style.display = 'flex';
+        controlsBrawlers.style.display = 'none';
+      } else {
+        tabBrawlers.classList.add('active');
+        tabMaps.classList.remove('active');
+        sectionBrawlers.classList.add('active');
+        sectionMaps.classList.remove('active');
+        controlsBrawlers.style.display = 'flex';
+        controlsMaps.style.display = 'none';
+        renderAllBrawlers();
+      }
+    }
+
+    // RENDERIZAR MAPAS
+    const mapsGrid = document.getElementById('mapsGrid');
+    const searchInput = document.getElementById('searchInput');
+    const filterButtons = document.querySelectorAll('.filter-btn');
+    let selectedMode = 'all';
+    let searchQuery = '';
+
+    function renderMaps() {
+      mapsGrid.innerHTML = '';
+      const filteredMaps = mapsData.filter(map => {
+        const matchesMode = selectedMode === 'all' || map.mode === selectedMode;
+        const matchesSearch = map.name.toLowerCase().includes(searchQuery.toLowerCase());
+        return matchesMode && matchesSearch;
+      });
+
+      if (filteredMaps.length === 0) {
+        mapsGrid.innerHTML = '<p style="grid-column: 1/-1; text-align: center; color: var(--text-muted);">Nenhum mapa encontrado.</p>';
+        return;
+      }
+
+      filteredMaps.forEach(map => {
+        const card = document.createElement('div');
+        card.className = 'map-card';
+        card.onclick = () => openModal(map);
+        card.innerHTML = `
+          <div class="map-header">
+            <div class="map-name">${map.name}</div>
+            <span class="mode-badge ${map.modeClass}">${map.mode}</span>
+          </div>
+          <div class="map-body">
+            <div class="top-tier-preview">
+              <div class="top-tier-label">S-Tier Meta:</div>
+              <div class="brawlers-pills">
+                ${map.tierS.map(brawler => `<span class="pill">${brawler}</span>`).join('')}
+              </div>
+            </div>
+          </div>
+        `;
+        mapsGrid.appendChild(card);
+      });
+    }
+
+    // RENDERIZAR TODOS OS BRAWLERS POR TIER
+    const brawlersTierContainer = document.getElementById('brawlersTierContainer');
+    const searchBrawlerInput = document.getElementById('searchBrawlerInput');
+    let brawlerSearchQuery = '';
+
+    function renderAllBrawlers() {
+      brawlersTierContainer.innerHTML = '';
+      const tiers = ['S', 'A', 'B', 'C', 'D'];
+      const tierColors = { 'S': 'var(--tier-s)', 'A': 'var(--tier-a)', 'B': 'var(--tier-b)', 'C': 'var(--tier-c)', 'D': 'var(--tier-d)' };
+
+      tiers.forEach(tierLetter => {
+        const brawlersInTier = todosOsBrawlersMeta.filter(b => 
+          b.tier === tierLetter && 
+          b.nome.toLowerCase().includes(brawlerSearchQuery.toLowerCase())
+        );
+
+        if (brawlersInTier.length > 0) {
+          const groupDiv = document.createElement('div');
+          groupDiv.className = 'tier-group-box';
+          
+          let cardsHtml = brawlersInTier.map(b => `
+            <div class="brawler-item-card">
+              <div class="brawler-item-name" style="color: ${tierColors[tierLetter]}">${b.nome}</div>
+              <div class="brawler-item-role">${b.funcao}</div>
+            </div>
+          `).join('');
+
+          groupDiv.innerHTML = `
+            <div class="tier-group-header">
+              <div class="tier-title-badge" style="background: ${tierColors[tierLetter]}">${tierLetter}</div>
+              <h3 style="font-family: 'Rajdhani', sans-serif; font-size: 1.3rem;">Tier ${tierLetter} (${brawlersInTier.length})</h3>
+            </div>
+            <div class="brawler-cards-grid">
+              ${cardsHtml}
+            </div>
+          `;
+          brawlersTierContainer.appendChild(groupDiv);
+        }
+      });
+    }
+
+    // MODAL DE MAPAS
+    const modalOverlay = document.getElementById('modalOverlay');
+    const closeModalBtn = document.getElementById('closeModal');
+
+    function openModal(map) {
+      document.getElementById('modalMapName').innerText = map.name;
+      const badge = document.getElementById('modalModeBadge');
+      badge.innerText = map.mode;
+      badge.className = `mode-badge ${map.modeClass}`;
+
+      document.getElementById('modalTierS').innerHTML = map.tierS.map(b => `<span class="pill">${b}</span>`).join('');
+      document.getElementById('modalTierA').innerHTML = map.tierA.map(b => `<span class="pill" style="color: var(--tier-a); border-color: var(--tier-a); background: rgba(255,165,2,0.2);">${b}</span>`).join('');
+      document.getElementById('modalTierB').innerHTML = map.tierB.map(b => `<span class="pill" style="color: var(--tier-b); border-color: var(--tier-b); background: rgba(46,213,115,0.2);">${b}</span>`).join('');
+      document.getElementById('modalStrategy').innerText = map.strategy;
+
+      modalOverlay.classList.add('active');
+    }
+
+    closeModalBtn.onclick = () => modalOverlay.classList.remove('active');
+    modalOverlay.onclick = (e) => {
+      if (e.target === modalOverlay) modalOverlay.classList.remove('active');
+    };
+
+    // EVENTOS DE BUSCA E FILTROS
+    searchInput.addEventListener('input', (e) => {
+      searchQuery = e.target.value;
+      renderMaps();
+    });
+
+    searchBrawlerInput.addEventListener('input', (e) => {
+      brawlerSearchQuery = e.target.value;
+      renderAllBrawlers();
+    });
+
+    filterButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        filterButtons.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        selectedMode = btn.getAttribute('data-mode');
+        renderMaps();
+      });
+    });
+
+    // INICIALIZAÇÃO
+    renderMaps();
+  </script>
+</body>
+</html>
