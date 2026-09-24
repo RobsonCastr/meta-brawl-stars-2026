@@ -1,834 +1,1470 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Brawl Stars Meta Tracker - Mapas & Brawlers</title>
-  <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
-  <style>
-    :root {
-      --bg-dark: #0a0c14;
-      --bg-card: #141824;
-      --bg-card-hover: #1c2235;
-      --accent-yellow: #ffcc00;
-      --accent-cyan: #00f0ff;
-      --tier-s: #ff4757;
-      --tier-a: #ffa502;
-      --tier-b: #2ed573;
-      --tier-c: #3498db;
-      --tier-d: #95a5a6;
-      --text-main: #ffffff;
-      --text-muted: #8e9bb0;
-      --border-color: rgba(255, 255, 255, 0.1);
-      --radius: 12px;
-      --shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-    }
-
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
-
-    body {
-      background-color: var(--bg-dark);
-      color: var(--text-main);
-      font-family: 'Roboto', sans-serif;
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-    }
-
-    /* HEADER & HERO */
-    header {
-      background: linear-gradient(180deg, #181c2e 0%, var(--bg-dark) 100%);
-      padding: 2rem 1rem;
-      border-bottom: 1px solid var(--border-color);
-      text-align: center;
-    }
-
-    .brand {
-      font-family: 'Rajdhani', sans-serif;
-      font-size: 2.8rem;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 2px;
-      color: var(--accent-yellow);
-      text-shadow: 0 0 15px rgba(255, 204, 0, 0.4);
-      margin-bottom: 0.5rem;
-    }
-
-    .subtitle {
-      color: var(--text-muted);
-      font-size: 1rem;
-      margin-bottom: 1.5rem;
-    }
-
-    /* ABAS PRINCIPAIS (TABS) */
-    .main-tabs {
-      display: flex;
-      justify-content: center;
-      gap: 1rem;
-      margin-bottom: 1.5rem;
-    }
-
-    .tab-btn {
-      background: transparent;
-      border: 1px solid var(--border-color);
-      color: var(--text-muted);
-      padding: 0.5rem 1.5rem;
-      border-radius: 8px;
-      cursor: pointer;
-      font-family: 'Rajdhani', sans-serif;
-      font-size: 1.1rem;
-      font-weight: 600;
-      text-transform: uppercase;
-      transition: all 0.3s ease;
-    }
-
-    .tab-btn.active {
-      background: var(--accent-cyan);
-      color: #000;
-      border-color: var(--accent-cyan);
-      box-shadow: 0 0 10px rgba(0, 240, 255, 0.4);
-    }
-
-    /* CONTROLES */
-    .controls-container {
-      max-width: 1100px;
-      margin: 0 auto;
-      display: flex;
-      flex-wrap: wrap;
-      gap: 1rem;
-      justify-content: space-between;
-      align-items: center;
-      padding: 0 1rem;
-    }
-
-    .search-bar {
-      position: relative;
-      flex: 1;
-      min-width: 250px;
-    }
-
-    .search-bar input {
-      width: 100%;
-      padding: 0.8rem 1.2rem;
-      border-radius: 25px;
-      background: var(--bg-card);
-      border: 1px solid var(--border-color);
-      color: var(--text-main);
-      font-size: 0.95rem;
-      outline: none;
-      transition: all 0.3s ease;
-    }
-
-    .search-bar input:focus {
-      border-color: var(--accent-cyan);
-      box-shadow: 0 0 10px rgba(0, 240, 255, 0.3);
-    }
-
-    .filter-group {
-      display: flex;
-      gap: 0.5rem;
-      overflow-x: auto;
-      padding-bottom: 0.5rem;
-    }
-
-    .filter-btn {
-      background: var(--bg-card);
-      border: 1px solid var(--border-color);
-      color: var(--text-muted);
-      padding: 0.6rem 1.2rem;
-      border-radius: 20px;
-      cursor: pointer;
-      font-family: 'Rajdhani', sans-serif;
-      font-weight: 600;
-      font-size: 0.95rem;
-      text-transform: uppercase;
-      white-space: nowrap;
-      transition: all 0.2s ease;
-    }
-
-    .filter-btn:hover, .filter-btn.active {
-      background: var(--accent-yellow);
-      color: #000;
-      border-color: var(--accent-yellow);
-      box-shadow: 0 0 10px rgba(255, 204, 0, 0.4);
-    }
-
-    /* MAIN CONTAINER */
-    main {
-      max-width: 1100px;
-      margin: 2rem auto;
-      padding: 0 1rem;
-      flex: 1;
-      width: 100%;
-    }
-
-    .section-view {
-      display: none;
-    }
-
-    .section-view.active {
-      display: block;
-    }
-
-    .grid-maps {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-      gap: 1.5rem;
-    }
-
-    /* MAP CARD */
-    .map-card {
-      background: var(--bg-card);
-      border-radius: var(--radius);
-      border: 1px solid var(--border-color);
-      overflow: hidden;
-      cursor: pointer;
-      transition: transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
-      display: flex;
-      flex-direction: column;
-    }
-
-    .map-card:hover {
-      transform: translateY(-5px);
-      border-color: var(--accent-cyan);
-      box-shadow: var(--shadow);
-      background: var(--bg-card-hover);
-    }
-
-    .map-header {
-      padding: 1rem;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      border-bottom: 1px solid var(--border-color);
-    }
-
-    .map-name {
-      font-family: 'Rajdhani', sans-serif;
-      font-size: 1.4rem;
-      font-weight: 700;
-    }
-
-    .mode-badge {
-      font-size: 0.75rem;
-      font-weight: 700;
-      text-transform: uppercase;
-      padding: 0.3rem 0.6rem;
-      border-radius: 12px;
-      background: rgba(255, 255, 255, 0.1);
-    }
-
-    .mode-pique-gema { color: #a55eea; }
-    .mode-fute-brawl { color: #26de81; }
-    .mode-nocaute { color: #ff6b6b; }
-    .mode-duelos { color: #ffbe76; }
-
-    .map-body {
-      padding: 1rem;
-      flex: 1;
-    }
-
-    .top-tier-preview {
-      margin-top: 0.5rem;
-    }
-
-    .top-tier-label {
-      font-size: 0.8rem;
-      color: var(--text-muted);
-      text-transform: uppercase;
-      letter-spacing: 1px;
-      margin-bottom: 0.5rem;
-    }
-
-    .brawlers-pills {
-      display: flex;
-      gap: 0.4rem;
-      flex-wrap: wrap;
-    }
-
-    .pill {
-      background: rgba(255, 71, 87, 0.2);
-      color: var(--tier-s);
-      border: 1px solid var(--tier-s);
-      padding: 0.2rem 0.6rem;
-      border-radius: 6px;
-      font-size: 0.85rem;
-      font-weight: 700;
-    }
-
-    /* LISTA GERAL DE BRAWLERS */
-    .brawlers-tier-container {
-      display: flex;
-      flex-direction: column;
-      gap: 1.5rem;
-    }
-
-    .tier-group-box {
-      background: var(--bg-card);
-      border: 1px solid var(--border-color);
-      border-radius: var(--radius);
-      padding: 1.2rem;
-    }
-
-    .tier-group-header {
-      display: flex;
-      align-items: center;
-      gap: 1rem;
-      margin-bottom: 1rem;
-      border-bottom: 1px solid var(--border-color);
-      padding-bottom: 0.5rem;
-    }
-
-    .tier-title-badge {
-      width: 35px;
-      height: 35px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-family: 'Rajdhani', sans-serif;
-      font-weight: 700;
-      font-size: 1.2rem;
-      border-radius: 6px;
-      color: #fff;
-    }
-
-    .brawler-cards-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-      gap: 0.8rem;
-    }
-
-    .brawler-item-card {
-      background: rgba(255, 255, 255, 0.03);
-      border: 1px solid var(--border-color);
-      padding: 0.8rem;
-      border-radius: 8px;
-      display: flex;
-      flex-direction: column;
-      gap: 0.2rem;
-    }
-
-    .brawler-item-name {
-      font-family: 'Rajdhani', sans-serif;
-      font-size: 1.1rem;
-      font-weight: 700;
-    }
-
-    .brawler-item-role {
-      font-size: 0.75rem;
-      color: var(--text-muted);
-      text-transform: uppercase;
-    }
-
-    /* MODAL DETALHES */
-    .modal-overlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0, 0, 0, 0.85);
-      backdrop-filter: blur(5px);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity 0.3s ease;
-      z-index: 1000;
-    }
-
-    .modal-overlay.active {
-      opacity: 1;
-      pointer-events: all;
-    }
-
-    .modal-content {
-      background: var(--bg-card);
-      width: 90%;
-      max-width: 700px;
-      max-height: 90vh;
-      border-radius: var(--radius);
-      border: 1px solid var(--accent-cyan);
-      box-shadow: 0 0 20px rgba(0, 240, 255, 0.2);
-      overflow-y: auto;
-      padding: 2rem;
-      position: relative;
-    }
-
-    .close-btn {
-      position: absolute;
-      top: 1rem;
-      right: 1.5rem;
-      background: none;
-      border: none;
-      color: var(--text-muted);
-      font-size: 2rem;
-      cursor: pointer;
-    }
-
-    .close-btn:hover { color: #fff; }
-
-    .modal-title {
-      font-family: 'Rajdhani', sans-serif;
-      font-size: 2rem;
-      color: var(--accent-yellow);
-      margin-bottom: 0.2rem;
-    }
-
-    .tier-section {
-      margin: 1.5rem 0;
-    }
-
-    .tier-row {
-      display: flex;
-      align-items: center;
-      margin-bottom: 0.8rem;
-      background: rgba(255, 255, 255, 0.03);
-      padding: 0.6rem;
-      border-radius: 8px;
-    }
-
-    .tier-badge {
-      width: 40px;
-      height: 40px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-family: 'Rajdhani', sans-serif;
-      font-weight: 700;
-      font-size: 1.4rem;
-      border-radius: 6px;
-      margin-right: 1rem;
-    }
-
-    .badge-s { background: var(--tier-s); color: #fff; }
-    .badge-a { background: var(--tier-a); color: #fff; }
-    .badge-b { background: var(--tier-b); color: #fff; }
-
-    .strategy-box {
-      background: rgba(0, 240, 255, 0.05);
-      border-left: 4px solid var(--accent-cyan);
-      padding: 1rem;
-      border-radius: 0 8px 8px 0;
-      margin-top: 1rem;
-      font-size: 0.95rem;
-      line-height: 1.5;
-    }
-
-    footer {
-      text-align: center;
-      padding: 1.5rem;
-      color: var(--text-muted);
-      border-top: 1px solid var(--border-color);
-      font-size: 0.85rem;
-      margin-top: 2rem;
-    }
-  </style>
-</head>
-<body>
-
-  <header>
-    <div class="brand">BRAWL META PRO</div>
-    <div class="subtitle">Guia Estratégico de Mapas & Tier List de Brawlers</div>
-    
-    <!-- ABAS DE NAVEGAÇÃO -->
-    <div class="main-tabs">
-      <button class="tab-btn active" id="tabMaps" onclick="switchTab('maps')">Mapas & Estratégias</button>
-      <button class="tab-btn" id="tabBrawlers" onclick="switchTab('brawlers')">Todos os Brawlers</button>
-    </div>
-
-    <!-- CONTROLES (Muda dependendo da aba) -->
-    <div class="controls-container" id="controlsMaps">
-      <div class="search-bar">
-        <input type="text" id="searchInput" placeholder="Pesquisar mapa...">
-      </div>
-      <div class="filter-group" id="filterGroup">
-        <button class="filter-btn active" data-mode="all">Todos</button>
-        <button class="filter-btn" data-mode="Pique-Gema">Pique-Gema</button>
-        <button class="filter-btn" data-mode="Fute-Brawl">Fute-Brawl</button>
-        <button class="filter-btn" data-mode="Nocaute">Nocaute</button>
-        <button class="filter-btn" data-mode="Duelos">Duelos</button>
-      </div>
-    </div>
-
-    <div class="controls-container" id="controlsBrawlers" style="display: none;">
-      <div class="search-bar" style="width: 100%;">
-        <input type="text" id="searchBrawlerInput" placeholder="Pesquisar brawler pelo nome...">
-      </div>
-    </div>
-  </header>
-
-  <main>
-    <!-- SEÇÃO DE MAPAS -->
-    <section id="sectionMaps" class="section-view active">
-      <div class="grid-maps" id="mapsGrid">
-        <!-- Renderizado via JS -->
-      </div>
-    </section>
-
-    <!-- SEÇÃO DE TODOS OS BRAWLERS -->
-    <section id="sectionBrawlers" class="section-view">
-      <div class="brawlers-tier-container" id="brawlersTierContainer">
-        <!-- Renderizado via JS -->
-      </div>
-    </section>
-  </main>
-
-  <!-- Modal de Detalhes dos Mapas -->
-  <div class="modal-overlay" id="modalOverlay">
-    <div class="modal-content">
-      <button class="close-btn" id="closeModal">&times;</button>
-      <h2 class="modal-title" id="modalMapName">Nome do Mapa</h2>
-      <div class="mode-badge" id="modalModeBadge">Modo</div>
-      
-      <div class="tier-section">
-        <div class="tier-row">
-          <div class="tier-badge badge-s">S</div>
-          <div class="brawlers-pills" id="modalTierS"></div>
-        </div>
-        <div class="tier-row">
-          <div class="tier-badge badge-a">A</div>
-          <div class="brawlers-pills" id="modalTierA"></div>
-        </div>
-        <div class="tier-row">
-          <div class="tier-badge badge-b">B</div>
-          <div class="brawlers-pills" id="modalTierB"></div>
-        </div>
-      </div>
-
-      <div class="strategy-box">
-        <strong>Estratégia do Mapa:</strong>
-        <p id="modalStrategy">Dicas e dinâmicas de jogo...</p>
-      </div>
-    </div>
-  </div>
-
-  <footer>
-    <p>Brawl Meta Pro - Guia de Meta e Brawlers do Brawl Stars.</p>
-  </footer>
-
-  <script>
-    // BASE DE DADOS DOS MAPAS
-    const mapsData = [
-      {
-        id: 1,
-        name: "Mina Rochosa",
-        mode: "Pique-Gema",
-        modeClass: "mode-pique-gema",
-        tierS: ["Gene", "Carl", "Tara"],
-        tierA: ["Emz", "Crow", "Squeak"],
-        tierB: ["Rosa", "Poco", "Bo"],
-        strategy: "Mantenha o controle da área central. O Carregador de Gemas (Mid) deve jogar de forma recuada e segura. Utilize as laterais para aplicar pressão constante no time adversário."
-      },
-      {
-        id: 2,
-        name: "Estádio Sneaky",
-        mode: "Fute-Brawl",
-        modeClass: "mode-fute-brawl",
-        tierS: ["Rico", "Stu", "Buster"],
-        tierA: ["Max", "El Primo", "Fang"],
-        tierB: ["Darryl", "Bea", "Gale"],
-        strategy: "Use brawlers capazes de quebrar arbustos e paredes. Rico domina as paredes laterais aproveitando seus tiros com ricochete."
-      },
-      {
-        id: 3,
-        name: "Tiro Certo",
-        mode: "Nocaute",
-        modeClass: "mode-nocaute",
-        tierS: ["Piper", "Nani", "Angelo"],
-        tierA: ["Mandy", "Brock", "Belle"],
-        tierB: ["Tick", "Byron", "Gene"],
-        strategy: "No modo Nocaute neste mapa aberto, snipers e atiradores de longo alcance têm vantagem total. Mantenha distância e evite eliminações precoces."
-      },
-      {
-        id: 4,
-        name: "Besouros Duetos",
-        mode: "Duelos",
-        modeClass: "mode-duelos",
-        tierS: ["Stu", "Edgar", "Meg"],
-        tierA: ["Charlie", "Cordelius", "Spike"],
-        tierB: ["Pearl", "Leon", "Surge"],
-        strategy: "No modo Duelos, escolha uma ordem equilibrada de Brawlers 1v1. O seu primeiro Brawler precisa ser forte no x1 para garantir a vantagem logo no início."
-      }
-    ];
-
-    // BASE DE DADOS DE TODOS OS BRAWLERS
-    const todosOsBrawlersMeta = [
-      // TIER S
-      { nome: "Wendy", tier: "S", funcao: "Suporte" },
-      { nome: "Cosmo", tier: "S", funcao: "Controlador" },
-      { nome: "Bolt", tier: "S", funcao: "Tanque" },
-      { nome: "Shade", tier: "S", funcao: "Assassino" },
-      { nome: "Gus", tier: "S", funcao: "Suporte" },
-      { nome: "Amber", tier: "S", funcao: "Controladora" },
-      { nome: "Rico", tier: "S", funcao: "Disparador" },
-      { nome: "Griff", tier: "S", funcao: "Lutador" },
-      { nome: "El Primo", tier: "S", funcao: "Tanque" },
-      { nome: "Max", tier: "S", funcao: "Suporte" },
-      { nome: "Mortis", tier: "S", funcao: "Assassino" },
-
-      // TIER A
-      { nome: "Nori", tier: "A", funcao: "Assassino" },
-      { nome: "Starr Nova", tier: "A", funcao: "Assassino" },
-      { nome: "Edgar", tier: "A", funcao: "Assassino" },
-      { nome: "Colette", tier: "A", funcao: "Destruidora de Tanques" },
-      { nome: "Maisie", tier: "A", funcao: "Controladora" },
-      { nome: "Colt", tier: "A", funcao: "Disparador" },
-      { nome: "Mandy", tier: "A", funcao: "Disparador" },
-      { nome: "Bo", tier: "A", funcao: "Controlador" },
-      { nome: "Eve", tier: "A", funcao: "Artilheira" },
-      { nome: "Surge", tier: "A", funcao: "Lutador" },
-      { nome: "Juju", tier: "A", funcao: "Controladora" },
-      { nome: "Lumi", tier: "A", funcao: "Disparador" },
-      { nome: "Byron", tier: "A", funcao: "Suporte" },
-      { nome: "Trunk", tier: "A", funcao: "Tanque" },
-      { nome: "Angelo", tier: "A", funcao: "Franco-Atirador" },
-      { nome: "Piper", tier: "A", funcao: "Franco-Atirador" },
-      { nome: "Pierce", tier: "A", funcao: "Controlador" },
-      { nome: "Alli", tier: "A", funcao: "Assassino" },
-      { nome: "Bibi", tier: "A", funcao: "Lutadora" },
-      { nome: "Chester", tier: "A", funcao: "Lutador" },
-      { nome: "Crow", tier: "A", funcao: "Assassino" },
-      { nome: "Brock", tier: "A", funcao: "Franco-Atirador" },
-
-      // TIER B
-      { nome: "Stu", tier: "B", funcao: "Assassino" },
-      { nome: "Buzz", tier: "B", funcao: "Assassino" },
-      { nome: "Emz", tier: "B", funcao: "Controladora" },
-      { nome: "Janet", tier: "B", funcao: "Franco-Atirador" },
-      { nome: "8-Bit", tier: "B", funcao: "Disparador" },
-      { nome: "Belle", tier: "B", funcao: "Franco-Atirador" },
-      { nome: "Mina", tier: "B", funcao: "Controladora" },
-      { nome: "Meeple", tier: "B", funcao: "Lutador" },
-      { nome: "Melodie", tier: "B", funcao: "Assassino" },
-      { nome: "Otis", tier: "B", funcao: "Controlador" },
-      { nome: "Bull", tier: "B", funcao: "Tanque" },
-      { nome: "Lou", tier: "B", funcao: "Controlador" },
-      { nome: "Charlie", tier: "B", funcao: "Controladora" },
-      { nome: "Grom", tier: "B", funcao: "Artilheiro" },
-      { nome: "Gigi", tier: "B", funcao: "Assassino" },
-      { nome: "Poco", tier: "B", funcao: "Suporte" },
-      { nome: "Shelly", tier: "B", funcao: "Lutadora" },
-      { nome: "Willow", tier: "B", funcao: "Controladora" },
-      { nome: "Sandy", tier: "B", funcao: "Controlador" },
-      { nome: "Ash", tier: "B", funcao: "Tanque" },
-      { nome: "Cordelius", tier: "B", funcao: "Assassino" },
-      { nome: "Sirius", tier: "B", funcao: "Controlador" },
-      { nome: "Kenji", tier: "B", funcao: "Assassino" },
-
-      // TIER C
-      { nome: "Meg", tier: "C", funcao: "Tanque" },
-      { nome: "Pearl", tier: "C", funcao: "Lutadora" },
-      { nome: "Spike", tier: "C", funcao: "Controlador" },
-      { nome: "Ollie", tier: "C", funcao: "Lutador" },
-      { nome: "Larry & Lawrie", tier: "C", funcao: "Artilheiros" },
-      { nome: "R-T", tier: "C", funcao: "Controlador" },
-      { nome: "Bea", tier: "C", funcao: "Franco-Atirador" },
-      { nome: "Gale", tier: "C", funcao: "Controlador" },
-      { nome: "Penny", tier: "C", funcao: "Controladora" },
-      { nome: "Lily", tier: "C", funcao: "Assassino" },
-      { nome: "Ziggy", tier: "C", funcao: "Controlador" },
-      { nome: "Berry", tier: "C", funcao: "Suporte" },
-      { nome: "Clancy", tier: "C", funcao: "Lutador" },
-      { nome: "Buster", tier: "C", funcao: "Tanque" },
-      { nome: "Frank", tier: "C", funcao: "Tanque" },
-      { nome: "Chuck", tier: "C", funcao: "Controlador" },
-      { nome: "Glowy", tier: "C", funcao: "Controlador" },
-      { nome: "Sam", tier: "C", funcao: "Lutador" },
-
-      // TIER D
-      { nome: "Moe", tier: "D", funcao: "Lutador" },
-      { nome: "Kit", tier: "D", funcao: "Suporte / Assassino" },
-      { nome: "Hank", tier: "D", funcao: "Tanque" },
-      { nome: "Doug", tier: "D", funcao: "Suporte" },
-      { nome: "Darryl", tier: "D", funcao: "Tanque" },
-      { nome: "Dynamike", tier: "D", funcao: "Artilheiro" },
-      { nome: "Tick", tier: "D", funcao: "Artilheiro" },
-      { nome: "Mr. P", tier: "D", funcao: "Controlador" },
-      { nome: "Nita", tier: "D", funcao: "Lutadora" },
-      { nome: "Rosa", tier: "D", funcao: "Tanque" },
-      { nome: "Jacky", tier: "D", funcao: "Tanque" },
-      { nome: "Carl", tier: "D", funcao: "Lutador" },
-      { nome: "Barley", tier: "D", funcao: "Artilheiro" },
-      { nome: "Ruffs", tier: "D", funcao: "Suporte" },
-      { nome: "Pam", tier: "D", funcao: "Suporte" },
-      { nome: "Gene", tier: "D", funcao: "Controlador" },
-      { nome: "Tara", tier: "D", funcao: "Controladora" },
-      { nome: "Squeak", tier: "D", funcao: "Controlador" },
-      { nome: "Fang", tier: "D", funcao: "Assassino" },
-      { nome: "Lola", tier: "D", funcao: "Disparador" },
-      { nome: "Bonnie", tier: "D", funcao: "Franco-Atirador / Tanque" },
-      { nome: "Mico", tier: "D", funcao: "Assassino" },
-      { nome: "Draco", tier: "D", funcao: "Tanque" },
-      { nome: "Vince", tier: "D", funcao: "Controlador" },
-      { nome: "Finx", tier: "D", funcao: "Disparador" },
-      { nome: "Damian", tier: "D", funcao: "Tanque" },
-      { nome: "Najia", tier: "D", funcao: "Controladora" },
-      { nome: "Nani", tier: "D", funcao: "Franco-Atirador" },
-      { nome: "Gray", tier: "D", funcao: "Suporte" },
-      { nome: "Jae-yong", tier: "D", funcao: "Lutador" }
-    ];
-
-    // CONTROLE DE ABAS (TABS)
-    function switchTab(tabName) {
-      const tabMaps = document.getElementById('tabMaps');
-      const tabBrawlers = document.getElementById('tabBrawlers');
-      const sectionMaps = document.getElementById('sectionMaps');
-      const sectionBrawlers = document.getElementById('sectionBrawlers');
-      const controlsMaps = document.getElementById('controlsMaps');
-      const controlsBrawlers = document.getElementById('controlsBrawlers');
-
-      if (tabName === 'maps') {
-        tabMaps.classList.add('active');
-        tabBrawlers.classList.remove('active');
-        sectionMaps.classList.add('active');
-        sectionBrawlers.classList.remove('active');
-        controlsMaps.style.display = 'flex';
-        controlsBrawlers.style.display = 'none';
-      } else {
-        tabBrawlers.classList.add('active');
-        tabMaps.classList.remove('active');
-        sectionBrawlers.classList.add('active');
-        sectionMaps.classList.remove('active');
-        controlsBrawlers.style.display = 'flex';
-        controlsMaps.style.display = 'none';
-        renderAllBrawlers();
-      }
-    }
-
-    // RENDERIZAR MAPAS
-    const mapsGrid = document.getElementById('mapsGrid');
-    const searchInput = document.getElementById('searchInput');
-    const filterButtons = document.querySelectorAll('.filter-btn');
-    let selectedMode = 'all';
-    let searchQuery = '';
-
-    function renderMaps() {
-      mapsGrid.innerHTML = '';
-      const filteredMaps = mapsData.filter(map => {
-        const matchesMode = selectedMode === 'all' || map.mode === selectedMode;
-        const matchesSearch = map.name.toLowerCase().includes(searchQuery.toLowerCase());
-        return matchesMode && matchesSearch;
-      });
-
-      if (filteredMaps.length === 0) {
-        mapsGrid.innerHTML = '<p style="grid-column: 1/-1; text-align: center; color: var(--text-muted);">Nenhum mapa encontrado.</p>';
-        return;
-      }
-
-      filteredMaps.forEach(map => {
-        const card = document.createElement('div');
-        card.className = 'map-card';
-        card.onclick = () => openModal(map);
-        card.innerHTML = `
-          <div class="map-header">
-            <div class="map-name">${map.name}</div>
-            <span class="mode-badge ${map.modeClass}">${map.mode}</span>
-          </div>
-          <div class="map-body">
-            <div class="top-tier-preview">
-              <div class="top-tier-label">S-Tier Meta:</div>
-              <div class="brawlers-pills">
-                ${map.tierS.map(brawler => `<span class="pill">${brawler}</span>`).join('')}
-              </div>
-            </div>
-          </div>
-        `;
-        mapsGrid.appendChild(card);
-      });
-    }
-
-    // RENDERIZAR TODOS OS BRAWLERS POR TIER
-    const brawlersTierContainer = document.getElementById('brawlersTierContainer');
-    const searchBrawlerInput = document.getElementById('searchBrawlerInput');
-    let brawlerSearchQuery = '';
-
-    function renderAllBrawlers() {
-      brawlersTierContainer.innerHTML = '';
-      const tiers = ['S', 'A', 'B', 'C', 'D'];
-      const tierColors = { 'S': 'var(--tier-s)', 'A': 'var(--tier-a)', 'B': 'var(--tier-b)', 'C': 'var(--tier-c)', 'D': 'var(--tier-d)' };
-
-      tiers.forEach(tierLetter => {
-        const brawlersInTier = todosOsBrawlersMeta.filter(b => 
-          b.tier === tierLetter && 
-          b.nome.toLowerCase().includes(brawlerSearchQuery.toLowerCase())
-        );
-
-        if (brawlersInTier.length > 0) {
-          const groupDiv = document.createElement('div');
-          groupDiv.className = 'tier-group-box';
-          
-          let cardsHtml = brawlersInTier.map(b => `
-            <div class="brawler-item-card">
-              <div class="brawler-item-name" style="color: ${tierColors[tierLetter]}">${b.nome}</div>
-              <div class="brawler-item-role">${b.funcao}</div>
-            </div>
-          `).join('');
-
-          groupDiv.innerHTML = `
-            <div class="tier-group-header">
-              <div class="tier-title-badge" style="background: ${tierColors[tierLetter]}">${tierLetter}</div>
-              <h3 style="font-family: 'Rajdhani', sans-serif; font-size: 1.3rem;">Tier ${tierLetter} (${brawlersInTier.length})</h3>
-            </div>
-            <div class="brawler-cards-grid">
-              ${cardsHtml}
-            </div>
-          `;
-          brawlersTierContainer.appendChild(groupDiv);
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Brawl Meta Pro - Guia Estratégico & Tier List</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <!-- FontAwesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        darkBg: '#0b0f17',
+                        cardBg: '#151d2a',
+                        cardHover: '#1c2638',
+                        metaYellow: '#facc15',
+                        cyberCyan: '#06b6d4',
+                        hyperPurple: '#a855f7',
+                        tierS: '#ef4444',
+                        tierA: '#f59e0b',
+                        tierB: '#3b82f6',
+                        tierC: '#10b981',
+                    }
+                }
+            }
         }
-      });
-    }
+    </script>
+    <style>
+        body {
+            background-color: #0b0f17;
+            color: #f3f4f6;
+            font-family: 'Inter', sans-serif;
+            min-height: 100vh;
+        }
+        /* Custom scrollbars */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0b0f17;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #1f2937;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #374151;
+        }
+        .text-glow-yellow {
+            text-shadow: 0 0 15px rgba(250, 204, 21, 0.4);
+        }
+        .text-glow-cyan {
+            text-shadow: 0 0 15px rgba(6, 182, 212, 0.4);
+        }
+        .card-shadow {
+            box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.5);
+        }
+        .card-hover-effect {
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .card-hover-effect:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px -4px rgba(6, 182, 212, 0.25);
+            border-color: #06b6d4;
+        }
+        /* Modal animations */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        .animate-modal {
+            animation: fadeIn 0.2s ease-out forwards;
+        }
+    </style>
+</head>
+<body class="flex flex-col min-h-screen">
+    <!-- Header Navbar -->
+    <header class="border-b border-gray-800 bg-[#0d131f]/90 sticky top-0 z-30 backdrop-blur-md">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+            <div class="flex flex-col md:flex-row items-center justify-between gap-4">
+                <div class="text-center md:text-left flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-yellow-500 to-amber-300 flex items-center justify-center text-gray-950 font-black text-xl shadow-lg shadow-yellow-500/20">
+                        ⚡
+                    </div>
+                    <div>
+                        <h1 class="text-2xl sm:text-3xl font-black tracking-wider text-metaYellow text-glow-yellow uppercase">
+                            BRAWL META PRO
+                        </h1>
+                        <p class="text-xs text-gray-400 font-medium">Guia Estratégico de Mapas & Tier List de Brawlers</p>
+                    </div>
+                </div>
 
-    // MODAL DE MAPAS
-    const modalOverlay = document.getElementById('modalOverlay');
-    const closeModalBtn = document.getElementById('closeModal');
+                <!-- Main Navigation Tabs -->
+                <nav class="flex flex-wrap justify-center gap-2 bg-[#121927] p-1.5 rounded-xl border border-gray-800">
+                    <button id="tab-brawlers" onclick="switchTab('brawlers')" 
+                        class="px-5 py-2.5 rounded-lg text-xs sm:text-sm font-bold transition-all duration-200 flex items-center gap-2 bg-gradient-to-r from-cyan-500 to-blue-600 text-white shadow-md shadow-cyan-500/20">
+                        <i class="fa-solid fa-users"></i> TODOS OS BRAWLERS
+                    </button>
+                    <button id="tab-mapas" onclick="switchTab('mapas')" 
+                        class="px-5 py-2.5 rounded-lg text-xs sm:text-sm font-bold text-gray-400 hover:text-white hover:bg-gray-800/60 transition-all duration-200 flex items-center gap-2">
+                        <i class="fa-solid fa-map"></i> MAPAS & ESTRATÉGIAS
+                    </button>
+                    <button id="tab-draft" onclick="switchTab('draft')" 
+                        class="px-5 py-2.5 rounded-lg text-xs sm:text-sm font-bold text-gray-400 hover:text-white hover:bg-gray-800/60 transition-all duration-200 flex items-center gap-2">
+                        <i class="fa-solid fa-crosshairs"></i> SIMULADOR DE COUNTER
+                    </button>
+                </nav>
+            </div>
+        </div>
+    </header>
 
-    function openModal(map) {
-      document.getElementById('modalMapName').innerText = map.name;
-      const badge = document.getElementById('modalModeBadge');
-      badge.innerText = map.mode;
-      badge.className = `mode-badge ${map.modeClass}`;
+    <!-- Main Container -->
+    <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
 
-      document.getElementById('modalTierS').innerHTML = map.tierS.map(b => `<span class="pill">${b}</span>`).join('');
-      document.getElementById('modalTierA').innerHTML = map.tierA.map(b => `<span class="pill" style="color: var(--tier-a); border-color: var(--tier-a); background: rgba(255,165,2,0.2);">${b}</span>`).join('');
-      document.getElementById('modalTierB').innerHTML = map.tierB.map(b => `<span class="pill" style="color: var(--tier-b); border-color: var(--tier-b); background: rgba(46,213,115,0.2);">${b}</span>`).join('');
-      document.getElementById('modalStrategy').innerText = map.strategy;
+        <!-- VIEW 1: BRAWLERS TIER LIST -->
+        <section id="view-brawlers" class="block space-y-6">
+            <!-- Search and Role Filters -->
+            <div class="bg-cardBg p-4 sm:p-5 rounded-2xl border border-gray-800/80 space-y-4 card-shadow">
+                <!-- Search Input -->
+                <div class="relative">
+                    <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                    <input type="text" id="brawler-search" oninput="filterBrawlers()" 
+                        placeholder="Pesquisar brawler pelo nome..." 
+                        class="w-full bg-[#0d131f] text-gray-200 text-sm rounded-xl pl-11 pr-4 py-3.5 border border-gray-700/60 focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 transition-all">
+                </div>
 
-      modalOverlay.classList.add('active');
-    }
+                <!-- Class / Role Filters -->
+                <div class="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none text-xs">
+                    <span class="text-gray-400 font-semibold whitespace-nowrap mr-1"><i class="fa-solid fa-filter text-cyan-400"></i> Classe:</span>
+                    <button onclick="setRoleFilter('ALL')" class="role-btn active px-3 py-1.5 rounded-lg font-semibold whitespace-nowrap bg-cyan-500 text-gray-950 transition-all" data-role="ALL">Todas</button>
+                    <button onclick="setRoleFilter('Assassino')" class="role-btn px-3 py-1.5 rounded-lg font-semibold whitespace-nowrap bg-gray-800 text-gray-300 hover:bg-gray-700 transition-all" data-role="Assassino">Assassino</button>
+                    <button onclick="setRoleFilter('Tanque')" class="role-btn px-3 py-1.5 rounded-lg font-semibold whitespace-nowrap bg-gray-800 text-gray-300 hover:bg-gray-700 transition-all" data-role="Tanque">Tanque</button>
+                    <button onclick="setRoleFilter('Suporte')" class="role-btn px-3 py-1.5 rounded-lg font-semibold whitespace-nowrap bg-gray-800 text-gray-300 hover:bg-gray-700 transition-all" data-role="Suporte">Suporte</button>
+                    <button onclick="setRoleFilter('Disparador')" class="role-btn px-3 py-1.5 rounded-lg font-semibold whitespace-nowrap bg-gray-800 text-gray-300 hover:bg-gray-700 transition-all" data-role="Disparador">Disparador</button>
+                    <button onclick="setRoleFilter('Controlador')" class="role-btn px-3 py-1.5 rounded-lg font-semibold whitespace-nowrap bg-gray-800 text-gray-300 hover:bg-gray-700 transition-all" data-role="Controlador">Controlador</button>
+                    <button onclick="setRoleFilter('Franco-Atirador')" class="role-btn px-3 py-1.5 rounded-lg font-semibold whitespace-nowrap bg-gray-800 text-gray-300 hover:bg-gray-700 transition-all" data-role="Franco-Atirador">Franco-Atirador</button>
+                    <button onclick="setRoleFilter('Lutador')" class="role-btn px-3 py-1.5 rounded-lg font-semibold whitespace-nowrap bg-gray-800 text-gray-300 hover:bg-gray-700 transition-all" data-role="Lutador">Lutador</button>
+                    <button onclick="setRoleFilter('Artilheiro')" class="role-btn px-3 py-1.5 rounded-lg font-semibold whitespace-nowrap bg-gray-800 text-gray-300 hover:bg-gray-700 transition-all" data-role="Artilheiro">Artilheiro</button>
+                    <button onclick="setRoleFilter('Destruidora de Tanques')" class="role-btn px-3 py-1.5 rounded-lg font-semibold whitespace-nowrap bg-gray-800 text-gray-300 hover:bg-gray-700 transition-all" data-role="Destruidora de Tanques">Destruidora</button>
+                </div>
+            </div>
 
-    closeModalBtn.onclick = () => modalOverlay.classList.remove('active');
-    modalOverlay.onclick = (e) => {
-      if (e.target === modalOverlay) modalOverlay.classList.remove('active');
-    };
+            <!-- Tier Container Sections -->
+            <div id="tier-sections-container" class="space-y-6">
+                <!-- Injected via JavaScript -->
+            </div>
+        </section>
 
-    // EVENTOS DE BUSCA E FILTROS
-    searchInput.addEventListener('input', (e) => {
-      searchQuery = e.target.value;
-      renderMaps();
-    });
+        <!-- VIEW 2: MAPAS & ESTRATÉGIAS -->
+        <section id="view-mapas" class="hidden space-y-6">
+            <div class="bg-cardBg p-6 rounded-2xl border border-gray-800 card-shadow space-y-4">
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-gray-800 pb-4">
+                    <div>
+                        <h2 class="text-xl font-black text-white flex items-center gap-2">
+                            <i class="fa-solid fa-map-location-dot text-cyan-400"></i> Seleção de Modo & Mapa
+                        </h2>
+                        <p class="text-xs text-gray-400">Escolha o mapa ativo para visualizar as melhores composições e picks recomendados.</p>
+                    </div>
 
-    searchBrawlerInput.addEventListener('input', (e) => {
-      brawlerSearchQuery = e.target.value;
-      renderAllBrawlers();
-    });
+                    <!-- Map Selector Dropdown -->
+                    <div class="flex gap-2">
+                        <select id="map-select" onchange="renderSelectedMapDetails()" 
+                            class="bg-[#0d131f] text-gray-200 text-sm font-semibold rounded-xl px-4 py-3 border border-gray-700 focus:outline-none focus:border-cyan-500">
+                            <!-- Populated dynamically -->
+                        </select>
+                    </div>
+                </div>
 
-    filterButtons.forEach(btn => {
-      btn.addEventListener('click', () => {
-        filterButtons.forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        selectedMode = btn.getAttribute('data-mode');
-        renderMaps();
-      });
-    });
+                <!-- Selected Map Display Container -->
+                <div id="map-details-container" class="space-y-6 pt-2">
+                    <!-- Dynamic Content -->
+                </div>
+            </div>
+        </section>
 
-    // INICIALIZAÇÃO
-    renderMaps();
-  </script>
+        <!-- VIEW 3: SIMULADOR DE COUNTER & DRAFT -->
+        <section id="view-draft" class="hidden space-y-6">
+            <div class="bg-cardBg p-6 rounded-2xl border border-gray-800 card-shadow space-y-6">
+                <div class="text-center max-w-2xl mx-auto space-y-2">
+                    <span class="px-3 py-1 rounded-full bg-purple-900/40 text-purple-300 border border-purple-500/30 text-xs font-bold uppercase tracking-wider">
+                        <i class="fa-solid fa-brain"></i> Algoritmo de Counter Pick
+                    </span>
+                    <h2 class="text-2xl font-black text-white">Simulador de Draft Competitivo</h2>
+                    <p class="text-xs sm:text-sm text-gray-400">
+                        Selecione até <span class="text-cyan-400 font-bold">3 Brawlers</span> do time inimigo para receber recomendações automáticas dos melhores counters e táticas.
+                    </p>
+                </div>
+
+                <!-- Draft Selection Slots -->
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-3xl mx-auto">
+                    <!-- Enemy Slot 1 -->
+                    <div class="bg-[#0d131f] border border-dashed border-red-500/40 rounded-xl p-4 text-center flex flex-col items-center justify-center space-y-2 min-h-[140px] relative" id="enemy-slot-0">
+                        <span class="text-xs font-bold text-red-400 uppercase tracking-wider">Inimigo 1</span>
+                        <div id="slot-0-content" class="text-gray-500 text-xs">Nenhum selecionado</div>
+                    </div>
+                    <!-- Enemy Slot 2 -->
+                    <div class="bg-[#0d131f] border border-dashed border-red-500/40 rounded-xl p-4 text-center flex flex-col items-center justify-center space-y-2 min-h-[140px] relative" id="enemy-slot-1">
+                        <span class="text-xs font-bold text-red-400 uppercase tracking-wider">Inimigo 2</span>
+                        <div id="slot-1-content" class="text-gray-500 text-xs">Nenhum selecionado</div>
+                    </div>
+                    <!-- Enemy Slot 3 -->
+                    <div class="bg-[#0d131f] border border-dashed border-red-500/40 rounded-xl p-4 text-center flex flex-col items-center justify-center space-y-2 min-h-[140px] relative" id="enemy-slot-2">
+                        <span class="text-xs font-bold text-red-400 uppercase tracking-wider">Inimigo 3</span>
+                        <div id="slot-2-content" class="text-gray-500 text-xs">Nenhum selecionado</div>
+                    </div>
+                </div>
+
+                <!-- Brawler Quick Selector Grid for Draft -->
+                <div class="space-y-3 pt-4 border-t border-gray-800">
+                    <div class="flex items-center justify-between">
+                        <h3 class="text-sm font-bold text-gray-300">Escolha os Brawlers Inimigos:</h3>
+                        <button onclick="clearDraftSelection()" class="text-xs text-red-400 hover:text-red-300 underline font-semibold">
+                            <i class="fa-solid fa-rotate-left"></i> Limpar Seleção
+                        </button>
+                    </div>
+                    <div id="draft-brawler-picker" class="grid grid-cols-3 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-10 gap-2 max-h-60 overflow-y-auto p-2 bg-[#0d131f] rounded-xl border border-gray-800">
+                        <!-- Dynamically populated buttons -->
+                    </div>
+                </div>
+
+                <!-- Recommended Counters Output -->
+                <div id="draft-results-container" class="space-y-4 pt-4">
+                    <div class="p-6 bg-[#0d131f] rounded-xl border border-gray-800 text-center text-gray-400 text-sm">
+                        <i class="fa-solid fa-shield-halved text-2xl text-cyan-500 mb-2 block"></i>
+                        Selecione pelo menos 1 brawler inimigo acima para ver os melhores counters.
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Brawler Detail Modal -->
+    <div id="brawler-modal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 hidden">
+        <div class="bg-cardBg border border-gray-700/80 rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto card-shadow animate-modal relative">
+            <!-- Close Button -->
+            <button onclick="closeModal()" class="absolute top-4 right-4 w-9 h-9 bg-gray-800 hover:bg-gray-700 text-gray-300 hover:text-white rounded-full flex items-center justify-center transition-all z-10">
+                <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+
+            <!-- Modal Content (Dynamic) -->
+            <div id="modal-content-body">
+                <!-- Dynamically populated -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="border-t border-gray-800/80 bg-[#0d131f] py-6 text-center text-xs text-gray-500 mt-12">
+        <div class="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-3">
+            <p><strong>BRAWL META PRO</strong> — Guia não oficial desenvolvido para fãs de Brawl Stars.</p>
+            <p class="text-gray-600">Atualizado para a versão mais recente do Meta 2026.</p>
+        </div>
+    </footer>
+
+    <!-- JavaScript Application Logic -->
+    <script>
+        // Brawler Database based on current Meta and image brawlers
+        const BRAWLERS_DATA = [
+            // TIER S
+            {
+                id: 'wendy',
+                name: 'Wendy',
+                role: 'Suporte',
+                tier: 'S',
+                hasHypercharge: true,
+                color: '#ec4899',
+                build: {
+                    gadget: 'Efeito Borboleta',
+                    gadgetDesc: 'Concede escudo instantâneo de 1200 HP e cura 15% para aliados próximos.',
+                    starPower: 'Aura Radiante',
+                    starPowerDesc: 'Aumenta a velocidade de movimento de aliados ao redor em 12%.',
+                    gears: ['Engrenagem de Dano (+15%)', 'Engrenagem de Visão']
+                },
+                hypercharge: {
+                    name: 'Super Wendy',
+                    desc: 'O Super ganha 25% de alcance extra e atordoa inimigos atalados por 1.5s.'
+                },
+                bestModes: [
+                    { mode: 'Fute-Brawl', rating: 5 },
+                    { mode: 'Pique-Gema', rating: 5 },
+                    { mode: 'Zona Restrita', rating: 4 }
+                ],
+                counters: ['elprimo', 'mortis', 'edgar'],
+                counteredBy: ['piper', 'angelo', 'mandy'],
+                synergies: ['bolt', 'shade', 'surge']
+            },
+            {
+                id: 'cosmo',
+                name: 'Cosmo',
+                role: 'Controlador',
+                tier: 'S',
+                hasHypercharge: true,
+                color: '#a855f7',
+                build: {
+                    gadget: 'Gravidade Zero',
+                    gadgetDesc: 'Empurra inimigos próximos e desacelera por 2.5s.',
+                    starPower: 'Órbita Densa',
+                    starPowerDesc: 'Aumenta a área de controle do ataque principal em 18%.',
+                    gears: ['Engrenagem de Recarga (+15%)', 'Escudo (+900 HP)']
+                },
+                hypercharge: {
+                    name: 'Singularidade',
+                    desc: 'A atração do Super causa dano contínuo acelerado e ignora paredes.'
+                },
+                bestModes: [
+                    { mode: 'Zona Restrita', rating: 5 },
+                    { mode: 'Pique-Gema', rating: 5 },
+                    { mode: 'Caça-Estrelas', rating: 4 }
+                ],
+                counters: ['elprimo', 'frank', 'rico'],
+                counteredBy: ['piper', 'eve', 'bo'],
+                synergies: ['amber', 'colette', 'gus']
+            },
+            {
+                id: 'bolt',
+                name: 'Bolt',
+                role: 'Tanque',
+                tier: 'S',
+                hasHypercharge: true,
+                color: '#eab308',
+                build: {
+                    gadget: 'Carga Magnética',
+                    gadgetDesc: 'Avança rapidamente e ganha 30% de redução de dano por 3s.',
+                    starPower: 'Sobrecarga',
+                    starPowerDesc: 'Recarrega o ataque 20% mais rápido quando está com HP completo.',
+                    gears: ['Velocidade na Grama', 'Engrenagem de Dano (+15%)']
+                },
+                hypercharge: {
+                    name: 'Trovoada Total',
+                    desc: 'O rastro do avanço paralisa inimigos atalados por 2s.'
+                },
+                bestModes: [
+                    { mode: 'Fute-Brawl', rating: 5 },
+                    { mode: 'Roubo', rating: 4 },
+                    { mode: 'Zona Restrita', rating: 4 }
+                ],
+                counters: ['mortis', 'piper', 'gus'],
+                counteredBy: ['colette', 'maisie', 'elprimo'],
+                synergies: ['wendy', 'byron', 'max']
+            },
+            {
+                id: 'shade',
+                name: 'Shade',
+                role: 'Assassino',
+                tier: 'S',
+                hasHypercharge: false,
+                color: '#8b5cf6',
+                build: {
+                    gadget: 'Passo Sombrio',
+                    gadgetDesc: 'Teleporta instantaneamente para a sombra projetada.',
+                    starPower: 'Golpe Crítico',
+                    starPowerDesc: 'Aumenta em 25% o dano do primeiro ataque ao sair da furtividade.',
+                    gears: ['Engrenagem de Dano (+15%)', 'Engrenagem de Visão']
+                },
+                hypercharge: null,
+                bestModes: [
+                    { mode: 'Caça-Estrelas', rating: 5 },
+                    { mode: 'Nocaute', rating: 5 },
+                    { mode: 'Pique-Gema', rating: 4 }
+                ],
+                counters: ['mandy', 'colt', 'piper'],
+                counteredBy: ['elprimo', 'bolt', 'amber'],
+                synergies: ['gus', 'max', 'wendy']
+            },
+            {
+                id: 'gus',
+                name: 'Gus',
+                role: 'Suporte',
+                tier: 'S',
+                hasHypercharge: false,
+                color: '#06b6d4',
+                build: {
+                    gadget: 'Explosão de Espírito',
+                    gadgetDesc: 'Fantasmas ativos explodem causando 1400 de dano aos inimigos próximos.',
+                    starPower: 'Visão de Fantasma',
+                    starPowerDesc: 'O escudo do Super concede 25% a mais de durabilidade.',
+                    gears: ['Escudo (+900 HP)', 'Engrenagem de Recarga']
+                },
+                hypercharge: null,
+                bestModes: [
+                    { mode: 'Nocaute', rating: 5 },
+                    { mode: 'Caça-Estrelas', rating: 5 },
+                    { mode: 'Pique-Gema', rating: 4 }
+                ],
+                counters: ['mortis', 'edgar'],
+                counteredBy: ['bolt', 'rico'],
+                synergies: ['shade', 'angelo', 'surge']
+            },
+            {
+                id: 'amber',
+                name: 'Amber',
+                role: 'Controladora',
+                tier: 'S',
+                hasHypercharge: true,
+                color: '#f97316',
+                build: {
+                    gadget: 'Ignição Rápida',
+                    gadgetDesc: 'Gera fluído inflamável ao redor e recarrega 50% da munição.',
+                    starPower: 'Chama Escaldante',
+                    starPowerDesc: 'Recarrega mais rápido quando perto de poças de óleo.',
+                    gears: ['Engrenagem de Dano (+15%)', 'Recarga Turbo']
+                },
+                hypercharge: {
+                    name: 'Super Inferno',
+                    desc: 'O óleo incendeia instantaneamente em uma área 40% maior.'
+                },
+                bestModes: [
+                    { mode: 'Zona Restrita', rating: 5 },
+                    { mode: 'Pique-Gema', rating: 5 },
+                    { mode: 'Fute-Brawl', rating: 4 }
+                ],
+                counters: ['frank', 'elprimo', 'shade'],
+                counteredBy: ['piper', 'mandy', 'angelo'],
+                synergies: ['cosmo', 'bo', 'rico']
+            },
+            {
+                id: 'rico',
+                name: 'Rico',
+                role: 'Disparador',
+                tier: 'S',
+                hasHypercharge: true,
+                color: '#10b981',
+                build: {
+                    gadget: 'Insuflador de Projéteis',
+                    gadgetDesc: 'Dispara ondas de projéteis em todas as direções.',
+                    starPower: 'Pula-Pula',
+                    starPowerDesc: 'Projéteis rebatidos causam +124 de dano extra.',
+                    gears: ['Engrenagem de Recarga', 'Dano Extra']
+                },
+                hypercharge: {
+                    name: 'Ricochete Infinito',
+                    desc: 'O Super ricocheteia mais longe e os projéteis aumentam de tamanho.'
+                },
+                bestModes: [
+                    { mode: 'Roubo', rating: 5 },
+                    { mode: 'Fute-Brawl', rating: 5 },
+                    { mode: 'Pique-Gema', rating: 4 }
+                ],
+                counters: ['gus', 'bo', 'colt'],
+                counteredBy: ['mortis', 'edgar', 'shade'],
+                synergies: ['amber', 'cosmo', 'wendy']
+            },
+            {
+                id: 'griff',
+                name: 'Griff',
+                role: 'Lutador',
+                tier: 'S',
+                hasHypercharge: false,
+                color: '#eab308',
+                build: {
+                    gadget: 'Piggy Bank Explosivo',
+                    gadgetDesc: 'Aumenta e quebra paredes próximas liberando moedas.',
+                    starPower: 'Troco Certo',
+                    starPowerDesc: 'Aumenta a velocidade de disparo dos projéteis em 25%.',
+                    gears: ['Engrenagem de Recarga', 'Dano (+15%)']
+                },
+                hypercharge: null,
+                bestModes: [
+                    { mode: 'Roubo', rating: 5 },
+                    { mode: 'Fute-Brawl', rating: 4 },
+                    { mode: 'Zona Restrita', rating: 4 }
+                ],
+                counters: ['elprimo', 'bolt', 'frank'],
+                counteredBy: ['piper', 'angelo', 'mandy'],
+                synergies: ['colette', 'amber', 'wendy']
+            },
+            {
+                id: 'elprimo',
+                name: 'El Primo',
+                role: 'Tanque',
+                tier: 'S',
+                hasHypercharge: true,
+                color: '#ef4444',
+                build: {
+                    gadget: 'Suplex de Apagão',
+                    gadgetDesc: 'Lança o inimigo mais próximo por cima dos ombros.',
+                    starPower: 'El Fuego',
+                    starPowerDesc: 'Inimigos atingidos pelo Super queimam por 1200 de dano total.',
+                    gears: ['Velocidade na Grama', 'Escudo (+900 HP)']
+                },
+                hypercharge: {
+                    name: 'Meteoro Supremo',
+                    desc: 'O impacto atrai todos os inimigos ao centro do impacto.'
+                },
+                bestModes: [
+                    { mode: 'Fute-Brawl', rating: 5 },
+                    { mode: 'Roubo', rating: 4 },
+                    { mode: 'Pique-Gema', rating: 4 }
+                ],
+                counters: ['shade', 'mortis', 'edgar'],
+                counteredBy: ['colette', 'maisie', 'griff'],
+                synergies: ['byron', 'gus', 'max']
+            },
+            {
+                id: 'max',
+                name: 'Max',
+                role: 'Suporte',
+                tier: 'S',
+                hasHypercharge: true,
+                color: '#f59e0b',
+                build: {
+                    gadget: 'Sabotagem de Tempo',
+                    gadgetDesc: 'Teleporta Max de volta à posição de 3 segundos atrás.',
+                    starPower: 'Correr e Carregar',
+                    starPowerDesc: 'Recarrega o ataque principal enquanto se movimenta.',
+                    gears: ['Engrenagem de Recarga', 'Escudo (+900 HP)']
+                },
+                hypercharge: {
+                    name: 'Hyper Hipervelocidade',
+                    desc: 'Acelera aliados no mapa inteiro e concede barra de Super bônus.'
+                },
+                bestModes: [
+                    { mode: 'Fute-Brawl', rating: 5 },
+                    { mode: 'Pique-Gema', rating: 5 },
+                    { mode: 'Zona Restrita', rating: 4 }
+                ],
+                counters: ['piper', 'mandy', 'bo'],
+                counteredBy: ['rico', 'amber', 'cosmo'],
+                synergies: ['elprimo', 'surge', 'bolt']
+            },
+            {
+                id: 'mortis',
+                name: 'Mortis',
+                role: 'Assassino',
+                tier: 'S',
+                hasHypercharge: true,
+                color: '#a855f7',
+                build: {
+                    gadget: 'Pá Giratória',
+                    gadgetDesc: 'Gira sua pá atingindo inimigos ao redor instantaneamente.',
+                    starPower: 'Coleta Sinistra',
+                    starPowerDesc: 'Recupera 1000 HP ao derrotar um Brawler inimigo.',
+                    gears: ['Engrenagem de Dano (+15%)', 'Escudo (+900 HP)']
+                },
+                hypercharge: {
+                    name: 'Enxame Sombrio',
+                    desc: 'Os morcegos do Super retornam e aplicam dano dobrado na volta.'
+                },
+                bestModes: [
+                    { mode: 'Caça-Estrelas', rating: 5 },
+                    { mode: 'Nocaute', rating: 5 },
+                    { mode: 'Fute-Brawl', rating: 4 }
+                ],
+                counters: ['dynamike', 'piper', 'rico'],
+                counteredBy: ['elprimo', 'wendy', 'gus'],
+                synergies: ['byron', 'max', 'gus']
+            },
+
+            // TIER A
+            {
+                id: 'nori',
+                name: 'Nori',
+                role: 'Assassino',
+                tier: 'A',
+                hasHypercharge: false,
+                color: '#ec4899',
+                build: {
+                    gadget: 'Lâmina Ninja',
+                    gadgetDesc: 'Fica invisível por 2 segundos e ganha velocidade extra.',
+                    starPower: 'Lacerar',
+                    starPowerDesc: 'Ataques aplicam efeito de sangramento contínuo.',
+                    gears: ['Dano (+15%)', 'Visão']
+                },
+                hypercharge: null,
+                bestModes: [{ mode: 'Caça-Estrelas', rating: 4 }, { mode: 'Nocaute', rating: 4 }],
+                counters: ['colt', 'mandy'],
+                counteredBy: ['elprimo', 'bolt'],
+                synergies: ['gus', 'shade']
+            },
+            {
+                id: 'starrnova',
+                name: 'Starr Nova',
+                role: 'Assassino',
+                tier: 'A',
+                hasHypercharge: false,
+                color: '#06b6d4',
+                build: {
+                    gadget: 'Constelação',
+                    gadgetDesc: 'Cria um campo de gravidade que desacelera oponentes.',
+                    starPower: 'Brilho Estelar',
+                    starPowerDesc: 'Ganha escudo a cada acerto de projétil.',
+                    gears: ['Escudo (+900 HP)', 'Recarga']
+                },
+                hypercharge: null,
+                bestModes: [{ mode: 'Pique-Gema', rating: 4 }, { mode: 'Zona Restrita', rating: 4 }],
+                counters: ['rico', 'eve'],
+                counteredBy: ['amber', 'surge'],
+                synergies: ['cosmo', 'wendy']
+            },
+            {
+                id: 'edgar',
+                name: 'Edgar',
+                role: 'Assassino',
+                tier: 'A',
+                hasHypercharge: true,
+                color: '#ef4444',
+                build: {
+                    gadget: 'Avaliando o Estilo',
+                    gadgetDesc: 'Carrega o Super 520% mais rápido durante 4s.',
+                    starPower: 'Aterrissagem Forçada',
+                    starPowerDesc: 'O salto causa 1000 de dano extra ao pousar.',
+                    gears: ['Dano (+15%)', 'Escudo']
+                },
+                hypercharge: {
+                    name: 'Salto Furioso',
+                    desc: 'Aumenta a velocidade de recarga e de movimento após pousar.'
+                },
+                bestModes: [{ mode: 'Roubo', rating: 4 }, { mode: 'Nocaute', rating: 4 }],
+                counters: ['dynamike', 'piper', 'mandy'],
+                counteredBy: ['elprimo', 'wendy', 'surge'],
+                synergies: ['byron', 'max']
+            },
+            {
+                id: 'colette',
+                name: 'Colette',
+                role: 'Destruidora de Tanques',
+                tier: 'A',
+                hasHypercharge: true,
+                color: '#f43f5e',
+                build: {
+                    gadget: 'Liquidação Na Hora',
+                    gadgetDesc: 'O próximo ataque cura Colette em 37% do dano causado.',
+                    starPower: 'Empurrãozinho',
+                    starPowerDesc: 'O Super empurra brawlers até o ponto limite.',
+                    gears: ['Recarga', 'Escudo']
+                },
+                hypercharge: {
+                    name: 'Espírito Cobrador',
+                    desc: 'A sombra de Colette segue o Super causando dano extra.'
+                },
+                bestModes: [{ mode: 'Roubo', rating: 5 }, { mode: 'Fute-Brawl', rating: 4 }],
+                counters: ['elprimo', 'bolt', 'frank'],
+                counteredBy: ['piper', 'angelo', 'shade'],
+                synergies: ['griff', 'amber']
+            },
+            {
+                id: 'maisie',
+                name: 'Maisie',
+                role: 'Controladora',
+                tier: 'A',
+                hasHypercharge: true,
+                color: '#3b82f6',
+                build: {
+                    gadget: 'Recuo Impactante',
+                    gadgetDesc: 'Dá um pulo para trás e paralisa o inimigo na frente.',
+                    starPower: 'Ponto de Impacto',
+                    starPowerDesc: 'Projéteis no limite máximo causam 20% a mais de dano.',
+                    gears: ['Dano (+15%)', 'Recarga']
+                },
+                hypercharge: {
+                    name: 'Onda Tripla',
+                    desc: 'O Super dispara em 360 graus projéteis adicionais.'
+                },
+                bestModes: [{ mode: 'Fute-Brawl', rating: 4 }, { mode: 'Zona Restrita', rating: 4 }],
+                counters: ['elprimo', 'edgar', 'mortis'],
+                counteredBy: ['piper', 'mandy'],
+                synergies: ['max', 'wendy']
+            },
+            {
+                id: 'colt',
+                name: 'Colt',
+                role: 'Disparador',
+                tier: 'A',
+                hasHypercharge: true,
+                color: '#3b82f6',
+                build: {
+                    gadget: 'Recarga Pronta',
+                    gadgetDesc: 'Recarrega instantaneamente 2 munições.',
+                    starPower: 'Botas Estilosas',
+                    starPowerDesc: 'Aumenta a velocidade de movimento em 13%.',
+                    gears: ['Recarga', 'Dano (+15%)']
+                },
+                hypercharge: {
+                    name: 'Rajada Dupla',
+                    desc: 'O Super é 120% mais largo e destrói tudo no caminho.'
+                },
+                bestModes: [{ mode: 'Roubo', rating: 5 }, { mode: 'Pique-Gema', rating: 4 }],
+                counters: ['frank', 'elprimo'],
+                counteredBy: ['mortis', 'shade'],
+                synergies: ['bo', 'max']
+            },
+            {
+                id: 'mandy',
+                name: 'Mandy',
+                role: 'Franco-Atirador',
+                tier: 'A',
+                hasHypercharge: false,
+                color: '#f43f5e',
+                build: {
+                    gadget: 'Doces Pegajosos',
+                    gadgetDesc: 'O próximo ataque lentifica o alvo por 2.5s.',
+                    starPower: 'Visão Confeitada',
+                    starPowerDesc: 'Projéteis viajam 20% mais rápido no modo focado.',
+                    gears: ['Dano (+15%)', 'Escudo']
+                },
+                hypercharge: null,
+                bestModes: [{ mode: 'Caça-Estrelas', rating: 5 }, { mode: 'Nocaute', rating: 5 }],
+                counters: ['amber', 'griff', 'wendy'],
+                counteredBy: ['mortis', 'edgar', 'shade'],
+                synergies: ['gus', 'byron']
+            },
+            {
+                id: 'bo',
+                name: 'Bo',
+                role: 'Controlador',
+                tier: 'A',
+                hasHypercharge: false,
+                color: '#16a34a',
+                build: {
+                    gadget: 'Totem de Águia',
+                    gadgetDesc: 'Gera um totem que recarrega o Super de aliados próximos.',
+                    starPower: 'Olho de Águia',
+                    starPowerDesc: 'Enxerga 150% mais longe dentro da grama.',
+                    gears: ['Dano (+15%)', 'Visão']
+                },
+                hypercharge: null,
+                bestModes: [{ mode: 'Pique-Gema', rating: 4 }, { mode: 'Zona Restrita', rating: 4 }],
+                counters: ['cosmo', 'rico'],
+                counteredBy: ['max', 'mortis'],
+                synergies: ['amber', 'colt']
+            },
+            {
+                id: 'eve',
+                name: 'Eve',
+                role: 'Artilheiro',
+                tier: 'A',
+                hasHypercharge: false,
+                color: '#10b981',
+                build: {
+                    gadget: 'Pulo do Sapo',
+                    gadgetDesc: 'Eve salta para longe deixando um filhote para trás.',
+                    starPower: 'Ordem de Inversão',
+                    starPowerDesc: 'Inverte a ordem do tamanho dos ovos disparados.',
+                    gears: ['Recarga', 'Escudo']
+                },
+                hypercharge: null,
+                bestModes: [{ mode: 'Pique-Gema', rating: 4 }, { mode: 'Caça-Estrelas', rating: 4 }],
+                counters: ['cosmo', 'piper'],
+                counteredBy: ['amber', 'rico'],
+                synergies: ['gus', 'byron']
+            },
+            {
+                id: 'surge',
+                name: 'Surge',
+                role: 'Lutador',
+                tier: 'A',
+                hasHypercharge: true,
+                color: '#dc2626',
+                build: {
+                    gadget: 'Evolução Expressa',
+                    gadgetDesc: 'Ganha temporariamente 1 nível de upgrade por 10s.',
+                    starPower: 'Servido Frio',
+                    starPowerDesc: 'Conserva o nível 1 de upgrade durante toda a partida.',
+                    gears: ['Dano (+15%)', 'Escudo']
+                },
+                hypercharge: {
+                    name: 'Nível 5 Supremo',
+                    desc: 'Atinge o nível 5 de upgrade com alcance máximo e divisão de tiros.'
+                },
+                bestModes: [{ mode: 'Fute-Brawl', rating: 5 }, { mode: 'Pique-Gema', rating: 4 }],
+                counters: ['elprimo', 'edgar', 'mortis'],
+                counteredBy: ['piper', 'mandy'],
+                synergies: ['max', 'wendy']
+            },
+            {
+                id: 'byron',
+                name: 'Byron',
+                role: 'Suporte',
+                tier: 'A',
+                hasHypercharge: false,
+                color: '#059669',
+                build: {
+                    gadget: 'Automedicação',
+                    gadgetDesc: 'Consome 1 munição para curar 1200 HP em 3s.',
+                    starPower: 'Injeção',
+                    starPowerDesc: 'A cada 3.5s o próximo ataque atravessa alvos.',
+                    gears: ['Recarga', 'Dano (+15%)']
+                },
+                hypercharge: null,
+                bestModes: [{ mode: 'Nocaute', rating: 5 }, { mode: 'Caça-Estrelas', rating: 4 }],
+                counters: ['colette', 'frank'],
+                counteredBy: ['mortis', 'shade'],
+                synergies: ['bolt', 'elprimo']
+            },
+            {
+                id: 'angelo',
+                name: 'Angelo',
+                role: 'Franco-Atirador',
+                tier: 'A',
+                hasHypercharge: false,
+                color: '#84cc16',
+                build: {
+                    gadget: 'Pulo Venenoso',
+                    gadgetDesc: 'Salta no ar e envenena inimigos ao redor.',
+                    starPower: 'Sombra da Floresta',
+                    starPowerDesc: 'Cura enquanto está parado na água.',
+                    gears: ['Dano (+15%)', 'Visão']
+                },
+                hypercharge: null,
+                bestModes: [{ mode: 'Caça-Estrelas', rating: 5 }, { mode: 'Nocaute', rating: 5 }],
+                counters: ['amber', 'wendy', 'griff'],
+                counteredBy: ['shade', 'mortis'],
+                synergies: ['gus', 'byron']
+            },
+
+            // TIER B & C
+            {
+                id: 'piper',
+                name: 'Piper',
+                role: 'Franco-Atirador',
+                tier: 'B',
+                hasHypercharge: true,
+                color: '#38bdf8',
+                build: {
+                    gadget: 'Autodefesa',
+                    gadgetDesc: 'Empurra inimigos próximos e causa desaceleração.',
+                    starPower: 'Ambush',
+                    starPowerDesc: 'Causa +1190 de dano extra atacando de dentro da grama.',
+                    gears: ['Dano (+15%)', 'Recarga']
+                },
+                hypercharge: {
+                    name: 'Bomba Cadenciada',
+                    desc: 'Lança mais bombas ao voar e afasta inimigos na aterrissagem.'
+                },
+                bestModes: [{ mode: 'Caça-Estrelas', rating: 5 }, { mode: 'Nocaute', rating: 4 }],
+                counters: ['amber', 'griff', 'wendy'],
+                counteredBy: ['mortis', 'edgar', 'bolt'],
+                synergies: ['gus', 'byron']
+            },
+            {
+                id: 'crow',
+                name: 'Crow',
+                role: 'Assassino',
+                tier: 'B',
+                hasHypercharge: true,
+                color: '#6366f1',
+                build: {
+                    gadget: 'Pluma Lentificadora',
+                    gadgetDesc: 'Inimigos envenenados são lentificados por 3s.',
+                    starPower: 'Veneno Extenuante',
+                    starPowerDesc: 'Inimigos envenenados causam 25% a menos de dano.',
+                    gears: ['Escudo', 'Dano (+15%)']
+                },
+                hypercharge: {
+                    name: 'Adagas Perfurantes',
+                    desc: 'As adagas do Super atravessam alvos e retornam.'
+                },
+                bestModes: [{ mode: 'Roubo', rating: 4 }, { mode: 'Pique-Gema', rating: 3 }],
+                counters: ['elprimo', 'byron'],
+                counteredBy: ['piper', 'angelo'],
+                synergies: ['spike', 'amber']
+            },
+            {
+                id: 'spike',
+                name: 'Spike',
+                role: 'Controlador',
+                tier: 'B',
+                hasHypercharge: true,
+                color: '#22c55e',
+                build: {
+                    gadget: 'Cacto de Proteção',
+                    gadgetDesc: 'Planta um cacto com 1000 HP para bloquear tiros.',
+                    starPower: 'Fertilizante',
+                    starPowerDesc: 'Cura 1000 HP por segundo enquanto está dentro do próprio Super.',
+                    gears: ['Dano (+15%)', 'Recarga']
+                },
+                hypercharge: {
+                    name: 'Florescimento',
+                    desc: 'A área do Super fica 20% maior e aplica desaceleração mais intensa.'
+                },
+                bestModes: [{ mode: 'Pique-Gema', rating: 4 }, { mode: 'Zona Restrita', rating: 4 }],
+                counters: ['elprimo', 'frank'],
+                counteredBy: ['piper', 'mandy'],
+                synergies: ['crow', 'bo']
+            },
+            {
+                id: 'frank',
+                name: 'Frank',
+                role: 'Tanque',
+                tier: 'B',
+                hasHypercharge: true,
+                color: '#64748b',
+                build: {
+                    gadget: 'Cancelamento de Ruído',
+                    gadgetDesc: 'Fica imune a atordoamento e empurrão por 2s.',
+                    starPower: 'Poder Agarrado',
+                    starPowerDesc: 'Aumenta a saúde total do Frank em 1100 HP.',
+                    gears: ['Velocidade na Grama', 'Escudo']
+                },
+                hypercharge: {
+                    name: 'Marreta Titânica',
+                    desc: 'O Super atinge uma área de 360 graus ao redor do Frank.'
+                },
+                bestModes: [{ mode: 'Fute-Brawl', rating: 4 }, { mode: 'Zona Restrita', rating: 3 }],
+                counters: ['mortis', 'shade'],
+                counteredBy: ['colette', 'griff', 'amber'],
+                synergies: ['byron', 'max']
+            },
+            {
+                id: 'dynamike',
+                name: 'Dynamike',
+                role: 'Artilheiro',
+                tier: 'C',
+                hasHypercharge: true,
+                color: '#ef4444',
+                build: {
+                    gadget: 'Atordoamento de Pobre',
+                    gadgetDesc: 'O próximo ataque atordoa por 1.5s.',
+                    starPower: 'Dyna-Jump',
+                    starPowerDesc: 'Salta por cima de obstáculos ao usar os explosivos.',
+                    gears: ['Dano (+15%)', 'Recarga']
+                },
+                hypercharge: {
+                    name: 'Mega Barril',
+                    desc: 'O Super libera mini dinamites extras após explodir.'
+                },
+                bestModes: [{ mode: 'Roubo', rating: 3 }, { mode: 'Pique-Gema', rating: 2 }],
+                counters: ['frank'],
+                counteredBy: ['mortis', 'edgar', 'shade'],
+                synergies: ['bo', 'cosmo']
+            }
+        ];
+
+        // Maps Database
+        const MAPS_DATA = [
+            {
+                id: 'fute_estadio',
+                mode: 'Fute-Brawl',
+                name: 'Estádio Fute-Brawl',
+                icon: 'fa-futbol',
+                description: 'Mapa aberto no centro com paredes estratégicas nas laterais. Excelente para mobilidade e controle.',
+                bestComps: [
+                    { name: 'Comp Agressiva Velocidade', brawlers: ['max', 'bolt', 'wendy'], desc: 'Max concede velocidade para Bolt invadir e Wendy dá suporte com escudos.' },
+                    { name: 'Comp Controle de Área', brawlers: ['cosmo', 'elprimo', 'amber'], desc: 'Mantém pressão contínua nos corredores laterais.' }
+                ],
+                topPicks: ['bolt', 'wendy', 'max', 'elprimo', 'surge']
+            },
+            {
+                id: 'pique_mina',
+                mode: 'Pique-Gema',
+                name: 'Mina Rochosa',
+                icon: 'fa-gem',
+                description: 'O mapa clássico de Pique-Gema com mina central exposta e moitas de emboscada.',
+                bestComps: [
+                    { name: 'Comp Carregador Seguro', brawlers: ['gus', 'cosmo', 'shade'], desc: 'Gus carrega as gemas com escudo enquanto Cosmo segura o centro.' },
+                    { name: 'Comp Pressão Total', brawlers: ['amber', 'rico', 'wendy'], desc: 'Dano massivo no centro impedindo a aproximação inimiga.' }
+                ],
+                topPicks: ['cosmo', 'gus', 'wendy', 'amber', 'rico']
+            },
+            {
+                id: 'roubo_ponte',
+                mode: 'Roubo',
+                name: 'Ponte Aérea',
+                icon: 'fa-[#f59e0b] fa-vault',
+                description: 'Corredores estreitos e paredes ideais para brawlers de projéteis ricocheteadores e alto DPS no cofre.',
+                bestComps: [
+                    { name: 'Comp Dps de Cofre', brawlers: ['rico', 'griff', 'colette'], desc: 'Derrete o cofre inimigo em segundos se conseguir posição.' },
+                    { name: 'Comp Invasão de Tanque', brawlers: ['bolt', 'elprimo', 'max'], desc: 'Avanço fulminante direto na base adversária.' }
+                ],
+                topPicks: ['rico', 'griff', 'colette', 'bolt', 'colt']
+            },
+            {
+                id: 'zona_besouro',
+                mode: 'Zona Restrita',
+                name: 'Besouro Vermelho',
+                icon: 'fa-bullseye',
+                description: 'Zona única central com coberturas laterais elevadas.',
+                bestComps: [
+                    { name: 'Comp Dominio Absoluto', brawlers: ['cosmo', 'amber', 'wendy'], desc: 'Impossibilita os inimigos de entrarem no anel central.' }
+                ],
+                topPicks: ['cosmo', 'amber', 'wendy', 'max', 'spike']
+            }
+        ];
+
+        // State variables
+        let currentTab = 'brawlers';
+        let currentRoleFilter = 'ALL';
+        let draftSelectedEnemies = [];
+
+        // DOM Initialization
+        document.addEventListener('DOMContentLoaded', () => {
+            renderTierList();
+            populateMapDropdown();
+            renderSelectedMapDetails();
+            renderDraftPicker();
+        });
+
+        // Tab Switching logic
+        function switchTab(tabName) {
+            currentTab = tabName;
+            
+            // Hide all views
+            document.getElementById('view-brawlers').classList.add('hidden');
+            document.getElementById('view-mapas').classList.add('hidden');
+            document.getElementById('view-draft').classList.add('hidden');
+
+            // Reset tab button styling
+            const btnBrawlers = document.getElementById('tab-brawlers');
+            const btnMapas = document.getElementById('tab-mapas');
+            const btnDraft = document.getElementById('tab-draft');
+
+            const inactiveStyle = "px-5 py-2.5 rounded-lg text-xs sm:text-sm font-bold text-gray-400 hover:text-white hover:bg-gray-800/60 transition-all duration-200 flex items-center gap-2";
+            const activeStyle = "px-5 py-2.5 rounded-lg text-xs sm:text-sm font-bold transition-all duration-200 flex items-center gap-2 bg-gradient-to-r from-cyan-500 to-blue-600 text-white shadow-md shadow-cyan-500/20";
+
+            btnBrawlers.className = inactiveStyle;
+            btnMapas.className = inactiveStyle;
+            btnDraft.className = inactiveStyle;
+
+            // Show selected view and activate button
+            if (tabName === 'brawlers') {
+                document.getElementById('view-brawlers').classList.remove('hidden');
+                btnBrawlers.className = activeStyle;
+            } else if (tabName === 'mapas') {
+                document.getElementById('view-mapas').classList.remove('hidden');
+                btnMapas.className = activeStyle;
+            } else if (tabName === 'draft') {
+                document.getElementById('view-draft').classList.remove('hidden');
+                btnDraft.className = activeStyle;
+            }
+        }
+
+        // Role Filter Logic
+        function setRoleFilter(role) {
+            currentRoleFilter = role;
+            document.querySelectorAll('.role-btn').forEach(btn => {
+                if (btn.getAttribute('data-role') === role) {
+                    btn.className = "role-btn active px-3 py-1.5 rounded-lg font-semibold whitespace-nowrap bg-cyan-500 text-gray-950 transition-all";
+                } else {
+                    btn.className = "role-btn px-3 py-1.5 rounded-lg font-semibold whitespace-nowrap bg-gray-800 text-gray-300 hover:bg-gray-700 transition-all";
+                }
+            });
+            filterBrawlers();
+        }
+
+        // Filter and Render Tier List
+        function filterBrawlers() {
+            const searchTerm = document.getElementById('brawler-search').value.toLowerCase().trim();
+            renderTierList(searchTerm, currentRoleFilter);
+        }
+
+        function renderTierList(search = '', role = 'ALL') {
+            const container = document.getElementById('tier-sections-container');
+            container.innerHTML = '';
+
+            const tiers = [
+                { id: 'S', title: 'Tier S', badgeBg: 'bg-red-500', borderClr: 'border-red-500/30' },
+                { id: 'A', title: 'Tier A', badgeBg: 'bg-amber-500', borderClr: 'border-amber-500/30' },
+                { id: 'B', title: 'Tier B', badgeBg: 'bg-blue-500', borderClr: 'border-blue-500/30' },
+                { id: 'C', title: 'Tier C', badgeBg: 'bg-emerald-500', borderClr: 'border-emerald-500/30' }
+            ];
+
+            tiers.forEach(tierObj => {
+                const brawlersInTier = BRAWLERS_DATA.filter(b => {
+                    const matchesTier = b.tier === tierObj.id;
+                    const matchesSearch = b.name.toLowerCase().includes(search);
+                    const matchesRole = role === 'ALL' || b.role.toLowerCase().includes(role.toLowerCase());
+                    return matchesTier && matchesSearch && matchesRole;
+                });
+
+                if (brawlersInTier.length > 0 || (search === '' && role === 'ALL')) {
+                    // Create Tier Section
+                    const section = document.createElement('div');
+                    section.className = "bg-cardBg rounded-2xl border border-gray-800/90 p-4 sm:p-5 card-shadow space-y-4";
+
+                    section.innerHTML = `
+                        <div class="flex items-center gap-3 border-b border-gray-800/80 pb-3">
+                            <span class="${tierObj.badgeBg} text-gray-950 font-black text-sm px-3 py-1 rounded-lg uppercase tracking-wider shadow-sm">
+                                ${tierObj.id}
+                            </span>
+                            <h2 class="text-lg font-bold text-white tracking-wide">
+                                ${tierObj.title} <span class="text-xs text-gray-400 font-normal">(${brawlersInTier.length})</span>
+                            </h2>
+                        </div>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
+                            ${brawlersInTier.map(b => createBrawlerCardHTML(b)).join('')}
+                        </div>
+                    `;
+                    container.appendChild(section);
+                }
+            });
+
+            if (container.children.length === 0) {
+                container.innerHTML = `
+                    <div class="p-12 text-center text-gray-400 bg-cardBg rounded-2xl border border-gray-800">
+                        <i class="fa-solid fa-ghost text-4xl mb-3 text-cyan-500"></i>
+                        <p class="text-base font-semibold">Nenhum Brawler encontrado com os filtros aplicados.</p>
+                    </div>
+                `;
+            }
+        }
+
+        function createBrawlerCardHTML(b) {
+            const hyperchargeBadge = b.hasHypercharge 
+                ? `<span class="px-1.5 py-0.5 text-[10px] rounded bg-purple-900/60 text-purple-300 border border-purple-500/40 font-bold flex items-center gap-1 shadow-sm" title="Possui Hipercarga">
+                    ⚡ Hyper
+                   </span>`
+                : '';
+
+            return `
+                <div onclick="openBrawlerModal('${b.id}')" 
+                    class="bg-[#121927] hover:bg-cardHover border border-gray-800/80 rounded-xl p-3.5 cursor-pointer card-hover-effect flex items-center justify-between gap-3 group transition-all">
+                    
+                    <div class="flex items-center gap-3 min-w-0">
+                        <!-- Custom Avatar Circle with Class color -->
+                        <div class="w-10 h-10 rounded-lg flex-shrink-0 flex items-center justify-center font-black text-white text-base shadow-inner" style="background-color: ${b.color}22; border: 1.5px solid ${b.color};">
+                            ${b.name.charAt(0)}
+                        </div>
+                        <div class="min-w-0">
+                            <h3 class="font-extrabold text-sm text-gray-100 group-hover:text-cyan-400 transition-colors truncate">
+                                ${b.name}
+                            </h3>
+                            <span class="text-[10px] font-bold uppercase text-gray-400 tracking-wider block">
+                                ${b.role}
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="flex flex-col items-end gap-1">
+                        ${hyperchargeBadge}
+                        <i class="fa-solid fa-chevron-right text-xs text-gray-600 group-hover:text-cyan-400 transition-colors"></i>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Modal functions
+        function openBrawlerModal(brawlerId) {
+            const b = BRAWLERS_DATA.find(item => item.id === brawlerId);
+            if (!b) return;
+
+            const modalBody = document.getElementById('modal-content-body');
+            
+            // Build star modes rating string
+            const modesHTML = b.bestModes.map(m => `
+                <div class="flex items-center justify-between text-xs bg-[#0d131f] p-2.5 rounded-lg border border-gray-800">
+                    <span class="font-bold text-gray-200">${m.mode}</span>
+                    <span class="text-amber-400">
+                        ${'★'.repeat(m.rating)}${'☆'.repeat(5 - m.rating)}
+                    </span>
+                </div>
+            `).join('');
+
+            // Build counters list
+            const countersNames = b.counters.map(id => BRAWLERS_DATA.find(x => x.id === id)?.name || id).join(', ');
+            const counteredByNames = b.counteredBy.map(id => BRAWLERS_DATA.find(x => x.id === id)?.name || id).join(', ');
+            const synergiesNames = b.synergies.map(id => BRAWLERS_DATA.find(x => x.id === id)?.name || id).join(', ');
+
+            modalBody.innerHTML = `
+                <div class="p-6 space-y-6">
+                    <!-- Modal Header -->
+                    <div class="flex items-start gap-4 border-b border-gray-800 pb-5">
+                        <div class="w-16 h-16 rounded-2xl flex items-center justify-center font-black text-white text-2xl shadow-lg" style="background-color: ${b.color}33; border: 2px solid ${b.color}; text-shadow: 0 0 10px ${b.color};">
+                            ${b.name.charAt(0)}
+                        </div>
+                        <div>
+                            <div class="flex items-center gap-2">
+                                <h2 class="text-2xl font-black text-white">${b.name}</h2>
+                                <span class="px-2 py-0.5 rounded text-xs font-black uppercase text-gray-950 ${b.tier === 'S' ? 'bg-red-500' : b.tier === 'A' ? 'bg-amber-500' : 'bg-blue-500'}">Tier ${b.tier}</span>
+                            </div>
+                            <p class="text-xs font-bold text-cyan-400 uppercase tracking-wider mt-1"><i class="fa-solid fa-shield"></i> ${b.role}</p>
+                        </div>
+                    </div>
+
+                    <!-- Recommended Builds -->
+                    <div class="space-y-3">
+                        <h3 class="text-sm font-bold text-yellow-400 flex items-center gap-2 uppercase tracking-wider">
+                            <i class="fa-solid fa-wand-magic-sparkles"></i> Build Recomendada
+                        </h3>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                            <div class="bg-[#0d131f] p-3 rounded-xl border border-gray-800 space-y-1">
+                                <span class="text-cyan-400 font-bold block"><i class="fa-solid fa-bolt"></i> Acessório (Gadget)</span>
+                                <p class="font-extrabold text-gray-200">${b.build.gadget}</p>
+                                <p class="text-gray-400 text-[11px] leading-relaxed">${b.build.gadgetDesc}</p>
+                            </div>
+                            <div class="bg-[#0d131f] p-3 rounded-xl border border-gray-800 space-y-1">
+                                <span class="text-yellow-400 font-bold block"><i class="fa-solid fa-star"></i> Poder de Estrela</span>
+                                <p class="font-extrabold text-gray-200">${b.build.starPower}</p>
+                                <p class="text-gray-400 text-[11px] leading-relaxed">${b.build.starPowerDesc}</p>
+                            </div>
+                        </div>
+                        <div class="bg-[#0d131f] p-3 rounded-xl border border-gray-800 space-y-1 text-xs">
+                            <span class="text-purple-400 font-bold block"><i class="fa-solid fa-gear"></i> Engrenagens (Gears)</span>
+                            <div class="flex flex-wrap gap-2 pt-1">
+                                ${b.build.gears.map(g => `<span class="px-2.5 py-1 rounded bg-gray-800 text-gray-200 font-semibold text-[11px] border border-gray-700">${g}</span>`).join('')}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Hypercharge Info -->
+                    ${b.hasHypercharge && b.hypercharge ? `
+                        <div class="bg-gradient-to-r from-purple-950/60 to-indigo-950/60 border border-purple-500/40 p-4 rounded-xl space-y-1">
+                            <div class="flex items-center gap-2 text-purple-300 font-black text-xs uppercase tracking-wider">
+                                ⚡ Hipercarga: ${b.hypercharge.name}
+                            </div>
+                            <p class="text-xs text-gray-300 leading-relaxed">${b.hypercharge.desc}</p>
+                        </div>
+                    ` : ''}
+
+                    <!-- Best Game Modes -->
+                    <div class="space-y-2">
+                        <h3 class="text-sm font-bold text-gray-300 flex items-center gap-2">
+                            <i class="fa-solid fa-trophy text-amber-400"></i> Desempenho nos Modos de Jogo
+                        </h3>
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                            ${modesHTML}
+                        </div>
+                    </div>
+
+                    <!-- Matchups (Counters & Synergies) -->
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs pt-2 border-t border-gray-800">
+                        <div class="bg-emerald-950/20 border border-emerald-500/30 p-3 rounded-xl">
+                            <span class="text-emerald-400 font-bold block mb-1"><i class="fa-solid fa-circle-check"></i> Forte Contra:</span>
+                            <p class="text-gray-300 font-medium">${countersNames || 'Diversos brawlers'}</p>
+                        </div>
+                        <div class="bg-red-950/20 border border-red-500/30 p-3 rounded-xl">
+                            <span class="text-red-400 font-bold block mb-1"><i class="fa-solid fa-circle-xmark"></i> Fraco Contra:</span>
+                            <p class="text-gray-300 font-medium">${counteredByNames || 'Brawlers de longo alcance'}</p>
+                        </div>
+                        <div class="bg-blue-950/20 border border-blue-500/30 p-3 rounded-xl">
+                            <span class="text-blue-400 font-bold block mb-1"><i class="fa-solid fa-handshake"></i> Boa Sinergia:</span>
+                            <p class="text-gray-300 font-medium">${synergiesNames || 'Comps equilibradas'}</p>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            document.getElementById('brawler-modal').classList.remove('hidden');
+        }
+
+        function closeModal() {
+            document.getElementById('brawler-modal').classList.add('hidden');
+        }
+
+        // Maps & Strategies logic
+        function populateMapDropdown() {
+            const select = document.getElementById('map-select');
+            select.innerHTML = MAPS_DATA.map(m => `
+                <option value="${m.id}">${m.mode}: ${m.name}</option>
+            `).join('');
+        }
+
+        function renderSelectedMapDetails() {
+            const select = document.getElementById('map-select');
+            const mapId = select.value;
+            const map = MAPS_DATA.find(m => m.id === mapId) || MAPS_DATA[0];
+
+            const container = document.getElementById('map-details-container');
+
+            const compsHTML = map.bestComps.map(c => {
+                const brawlerCards = c.brawlers.map(bId => {
+                    const b = BRAWLERS_DATA.find(x => x.id === bId);
+                    return b ? `
+                        <div class="flex items-center gap-2 bg-[#0d131f] px-3 py-2 rounded-lg border border-gray-800">
+                            <div class="w-6 h-6 rounded flex items-center justify-center font-bold text-white text-xs" style="background-color: ${b.color};">
+                                ${b.name.charAt(0)}
+                            </div>
+                            <span class="text-xs font-bold text-gray-200">${b.name}</span>
+                        </div>
+                    ` : '';
+                }).join('');
+
+                return `
+                    <div class="bg-[#121927] p-4 rounded-xl border border-gray-800 space-y-2">
+                        <h4 class="text-sm font-bold text-cyan-400 uppercase tracking-wider">${c.name}</h4>
+                        <div class="flex flex-wrap gap-2">
+                            ${brawlerCards}
+                        </div>
+                        <p class="text-xs text-gray-400 pt-1">${c.desc}</p>
+                    </div>
+                `;
+            }).join('');
+
+            const topPicksHTML = map.topPicks.map(bId => {
+                const b = BRAWLERS_DATA.find(x => x.id === bId);
+                return b ? `
+                    <button onclick="openBrawlerModal('${b.id}')" class="flex items-center gap-2 bg-[#121927] hover:bg-cardHover p-2.5 rounded-xl border border-gray-800 text-left transition-all">
+                        <div class="w-8 h-8 rounded-lg flex items-center justify-center font-bold text-white text-sm" style="background-color: ${b.color};">
+                            ${b.name.charAt(0)}
+                        </div>
+                        <div>
+                            <span class="text-xs font-bold text-gray-100 block">${b.name}</span>
+                            <span class="text-[10px] text-gray-400 font-semibold">Tier ${b.tier}</span>
+                        </div>
+                    </button>
+                ` : '';
+            }).join('');
+
+            container.innerHTML = `
+                <div class="bg-[#0d131f] p-5 rounded-xl border border-gray-800/80 space-y-2">
+                    <div class="flex items-center gap-2 text-yellow-400 font-bold text-sm">
+                        <i class="fa-solid ${map.icon}"></i> ${map.mode} — ${map.name}
+                    </div>
+                    <p class="text-xs text-gray-300 leading-relaxed">${map.description}</p>
+                </div>
+
+                <div class="space-y-3">
+                    <h3 class="text-sm font-bold text-white uppercase tracking-wider">Composições Ideais (Trios)</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        ${compsHTML}
+                    </div>
+                </div>
+
+                <div class="space-y-3">
+                    <h3 class="text-sm font-bold text-white uppercase tracking-wider">Melhores Picks Individuais</h3>
+                    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
+                        ${topPicksHTML}
+                    </div>
+                </div>
+            `;
+        }
+
+        // Draft Simulator Engine
+        function renderDraftPicker() {
+            const picker = document.getElementById('draft-brawler-picker');
+            picker.innerHTML = BRAWLERS_DATA.map(b => `
+                <button onclick="toggleDraftEnemy('${b.id}')" 
+                    class="p-2 rounded-lg bg-[#121927] hover:bg-gray-700 border border-gray-800 flex flex-col items-center justify-center gap-1 transition-all text-center">
+                    <div class="w-7 h-7 rounded flex items-center justify-center font-bold text-white text-xs" style="background-color: ${b.color};">
+                        ${b.name.charAt(0)}
+                    </div>
+                    <span class="text-[10px] font-bold text-gray-300 truncate w-full">${b.name}</span>
+                </button>
+            `).join('');
+        }
+
+        function toggleDraftEnemy(brawlerId) {
+            const index = draftSelectedEnemies.indexOf(brawlerId);
+            if (index > -1) {
+                draftSelectedEnemies.splice(index, 1);
+            } else {
+                if (draftSelectedEnemies.length < 3) {
+                    draftSelectedEnemies.push(brawlerId);
+                }
+            }
+            updateDraftUI();
+        }
+
+        function clearDraftSelection() {
+            draftSelectedEnemies = [];
+            updateDraftUI();
+        }
+
+        function updateDraftUI() {
+            // Update slots
+            for (let i = 0; i < 3; i++) {
+                const slotContent = document.getElementById(`slot-${i}-content`);
+                if (draftSelectedEnemies[i]) {
+                    const b = BRAWLERS_DATA.find(x => x.id === draftSelectedEnemies[i]);
+                    slotContent.innerHTML = `
+                        <div class="flex flex-col items-center gap-1">
+                            <div class="w-9 h-9 rounded-lg flex items-center justify-center font-black text-white text-sm" style="background-color: ${b.color};">
+                                ${b.name.charAt(0)}
+                            </div>
+                            <span class="font-bold text-white text-xs">${b.name}</span>
+                            <span class="text-[10px] text-gray-400">${b.role}</span>
+                        </div>
+                    `;
+                } else {
+                    slotContent.innerHTML = `<span class="text-gray-500 text-xs">Nenhum selecionado</span>`;
+                }
+            }
+
+            // Calculate Counters
+            calculateDraftCounters();
+        }
+
+        function calculateDraftCounters() {
+            const resultsContainer = document.getElementById('draft-results-container');
+
+            if (draftSelectedEnemies.length === 0) {
+                resultsContainer.innerHTML = `
+                    <div class="p-6 bg-[#0d131f] rounded-xl border border-gray-800 text-center text-gray-400 text-sm">
+                        <i class="fa-solid fa-shield-halved text-2xl text-cyan-500 mb-2 block"></i>
+                        Selecione pelo menos 1 brawler inimigo acima para ver os melhores counters.
+                    </div>
+                `;
+                return;
+            }
+
+            // Score calculation algorithm
+            const counterScores = BRAWLERS_DATA.filter(b => !draftSelectedEnemies.includes(b.id)).map(b => {
+                let score = 0;
+                let reasons = [];
+
+                draftSelectedEnemies.forEach(enemyId => {
+                    const enemy = BRAWLERS_DATA.find(x => x.id === enemyId);
+                    if (!enemy) return;
+
+                    // Direct counter match
+                    if (b.counters.includes(enemyId)) {
+                        score += 35;
+                        reasons.push(`Counter direto contra ${enemy.name}`);
+                    }
+                    if (enemy.counteredBy.includes(b.id)) {
+                        score += 25;
+                    }
+
+                    // Role counter advantage logic
+                    if (b.role === 'Destruidora de Tanques' && enemy.role === 'Tanque') {
+                        score += 20;
+                        reasons.push(`Excelente contra tanques como ${enemy.name}`);
+                    }
+                    if (b.role === 'Franco-Atirador' && enemy.role === 'Controlador') {
+                        score += 15;
+                    }
+                    if (b.role === 'Assassino' && (enemy.role === 'Franco-Atirador' || enemy.role === 'Artilheiro')) {
+                        score += 20;
+                        reasons.push(`Muda a distância rapidamente para abater ${enemy.name}`);
+                    }
+                });
+
+                // Tier bonus
+                if (b.tier === 'S') score += 15;
+                if (b.tier === 'A') score += 10;
+
+                return { brawler: b, score, reasons: [...new Set(reasons)] };
+            });
+
+            // Sort top 5
+            counterScores.sort((a, b) => b.score - a.score);
+            const top5 = counterScores.slice(0, 5);
+
+            resultsContainer.innerHTML = `
+                <div class="space-y-3">
+                    <h3 class="text-sm font-bold text-cyan-400 uppercase tracking-wider flex items-center gap-2">
+                        <i class="fa-solid fa-check-double"></i> Top 5 Recomendações de Counter Pick
+                    </h3>
+                    <div class="space-y-2">
+                        ${top5.map((item, index) => `
+                            <div class="bg-[#0d131f] p-4 rounded-xl border border-gray-800 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                                <div class="flex items-center gap-3">
+                                    <span class="w-6 h-6 rounded-full bg-cyan-500/20 text-cyan-300 font-black text-xs flex items-center justify-center">
+                                        #${index + 1}
+                                    </span>
+                                    <div class="w-10 h-10 rounded-lg flex items-center justify-center font-bold text-white text-base" style="background-color: ${item.brawler.color};">
+                                        ${item.brawler.name.charAt(0)}
+                                    </div>
+                                    <div>
+                                        <div class="flex items-center gap-2">
+                                            <h4 class="font-extrabold text-white text-sm">${item.brawler.name}</h4>
+                                            <span class="px-2 py-0.2 rounded text-[10px] font-bold bg-gray-800 text-gray-300">Tier ${item.brawler.tier}</span>
+                                        </div>
+                                        <p class="text-xs text-gray-400">${item.reasons.length > 0 ? item.reasons.join(' • ') : 'Excelente opção de resposta com base nas estatísticas gerais'}</p>
+                                    </div>
+                                </div>
+                                <button onclick="openBrawlerModal('${item.brawler.id}')" 
+                                    class="px-3 py-1.5 bg-gray-800 hover:bg-cyan-600 hover:text-gray-950 text-xs font-bold text-gray-200 rounded-lg transition-all self-end sm:self-center">
+                                    Ver Build
+                                </button>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+        }
+    </script>
 </body>
 </html>
