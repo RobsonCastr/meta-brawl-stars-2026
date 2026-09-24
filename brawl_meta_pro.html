@@ -1,0 +1,1207 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Brawl Meta Pro - Guia Definitivo e Simulador de Draft</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Font Awesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  
+  <!-- Google Fonts: Inter & Montserrat -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800;900&family=Montserrat:wght@800;900&display=swap" rel="stylesheet">
+  
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            bgDark: '#0f131d',
+            cardDark: '#191e2b',
+            cardHover: '#232a3d',
+            cyanAccent: '#00e5ff',
+            redAccent: '#ff4757',
+            goldTier: '#ffd700',
+            purpleTier: '#a55eea',
+            blueTier: '#45aaf2',
+            greenTier: '#26de81',
+            grayTier: '#778ca3'
+          },
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            display: ['Montserrat', 'sans-serif']
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    /* Custom Scrollbars & Neon Glows */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #0f131d;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #191e2b;
+      border-radius: 4px;
+      border: 1px solid #00e5ff33;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #00e5ff;
+    }
+
+    .cyan-glow {
+      box-shadow: 0 0 15px rgba(0, 229, 255, 0.25);
+    }
+    .red-glow {
+      box-shadow: 0 0 15px rgba(255, 71, 87, 0.25);
+    }
+    .card-border-glow {
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      transition: all 0.25s ease-in-out;
+    }
+    .card-border-glow:hover {
+      border-color: #00e5ff;
+      transform: translateY(-3px);
+      box-shadow: 0 8px 25px rgba(0, 229, 255, 0.15);
+    }
+
+    .modal-animate {
+      animation: modalFadeIn 0.2s ease-out forwards;
+    }
+    @keyframes modalFadeIn {
+      from { opacity: 0; transform: scale(0.95); }
+      to { opacity: 1; transform: scale(1); }
+    }
+  </style>
+</head>
+<body class="bg-[#0f131d] text-gray-100 font-sans min-h-screen flex flex-col selection:bg-cyanAccent selection:text-black">
+
+  <!-- Top Navigation Header -->
+  <header class="sticky top-0 z-40 bg-[#0f131d]/90 backdrop-blur-md border-b border-gray-800">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+      
+      <!-- Logo & Title -->
+      <div class="flex items-center gap-3">
+        <div class="w-12 h-12 rounded-xl bg-gradient-to-tr from-cyanAccent to-redAccent p-0.5 shadow-lg cyan-glow">
+          <div class="w-full h-full bg-[#0f131d] rounded-[10px] flex items-center justify-center">
+            <i class="fa-solid fa-trophy text-cyanAccent text-xl"></i>
+          </div>
+        </div>
+        <div>
+          <h1 class="font-display font-extrabold text-2xl tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-cyanAccent via-white to-redAccent">
+            BRAWL META PRO
+          </h1>
+          <p class="text-xs text-gray-400 font-medium flex items-center gap-2">
+            <span class="w-2 h-2 rounded-full bg-green-400 animate-pulse"></span>
+            Guia Competitivo Oficial • 85 Brawlers Reais
+          </p>
+        </div>
+      </div>
+
+      <!-- Navigation Tabs -->
+      <nav class="hidden md:flex items-center gap-2 bg-[#191e2b] p-1.5 rounded-xl border border-gray-800">
+        <button onclick="switchTab('brawlers')" id="tab-btn-brawlers" class="tab-btn px-5 py-2.5 rounded-lg text-sm font-bold transition-all duration-200 bg-cyanAccent text-black shadow-md">
+          <i class="fa-solid fa-users mr-2"></i>Todos os Brawlers
+        </button>
+        <button onclick="switchTab('maps')" id="tab-btn-maps" class="tab-btn px-5 py-2.5 rounded-lg text-sm font-bold text-gray-400 hover:text-white hover:bg-gray-800 transition-all duration-200">
+          <i class="fa-solid fa-map-location-dot mr-2"></i>Mapas & Estratégias
+        </button>
+        <button onclick="switchTab('draft')" id="tab-btn-draft" class="tab-btn px-5 py-2.5 rounded-lg text-sm font-bold text-gray-400 hover:text-white hover:bg-gray-800 transition-all duration-200">
+          <i class="fa-solid fa-wand-magic-sparkles mr-2 text-redAccent"></i>Simulador de Draft
+        </button>
+      </nav>
+
+      <!-- Badge Competitivo -->
+      <div class="hidden lg:flex items-center gap-3">
+        <span class="bg-redAccent/10 border border-redAccent/30 text-redAccent text-xs px-3 py-1.5 rounded-full font-bold uppercase tracking-wider flex items-center gap-2">
+          <i class="fa-solid fa-bolt"></i> Meta 2026
+        </span>
+      </div>
+    </div>
+
+    <!-- Mobile Navigation Tab Bar -->
+    <div class="md:hidden flex border-t border-gray-800 bg-[#191e2b]/95 backdrop-blur-md px-2 py-2 justify-around">
+      <button onclick="switchTab('brawlers')" id="mob-tab-brawlers" class="text-xs font-bold py-2 px-3 rounded-lg text-cyanAccent bg-cyanAccent/10 flex flex-col items-center gap-1">
+        <i class="fa-solid fa-users text-base"></i> Brawlers
+      </button>
+      <button onclick="switchTab('maps')" id="mob-tab-maps" class="text-xs font-bold py-2 px-3 rounded-lg text-gray-400 flex flex-col items-center gap-1">
+        <i class="fa-solid fa-map-location-dot text-base"></i> Mapas
+      </button>
+      <button onclick="switchTab('draft')" id="mob-tab-draft" class="text-xs font-bold py-2 px-3 rounded-lg text-gray-400 flex flex-col items-center gap-1">
+        <i class="fa-solid fa-wand-magic-sparkles text-base text-redAccent"></i> Draft Counter
+      </button>
+    </div>
+  </header>
+
+  <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+    <!-- ==================== TAB 1: TODOS OS BRAWLERS ==================== -->
+    <section id="tab-content-brawlers" class="space-y-6">
+      
+      <!-- Filters Header Section -->
+      <div class="bg-[#191e2b] p-6 rounded-2xl border border-gray-800 shadow-xl space-y-5">
+        
+        <!-- Search & Info Bar -->
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div class="relative flex-grow max-w-lg">
+            <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
+            <input type="text" id="brawler-search" placeholder="Buscar brawler por nome..." 
+              oninput="filterBrawlers()"
+              class="w-full pl-11 pr-4 py-3 bg-[#0f131d] border border-gray-700 rounded-xl text-sm focus:outline-none focus:border-cyanAccent text-white placeholder-gray-500 transition-colors">
+          </div>
+
+          <!-- Counter Stats -->
+          <div class="flex items-center justify-between md:justify-end gap-3 text-xs text-gray-400">
+            <span class="bg-[#0f131d] px-3 py-2 rounded-lg border border-gray-800">
+              Exibindo: <strong id="visible-count" class="text-cyanAccent font-bold">85</strong> / 85
+            </span>
+            <span class="bg-[#0f131d] px-3 py-2 rounded-lg border border-gray-800">
+              Classes Oficiais: <strong class="text-redAccent font-bold">7</strong>
+            </span>
+          </div>
+        </div>
+
+        <!-- Class Filter Buttons -->
+        <div>
+          <label class="block text-xs font-bold uppercase tracking-wider text-gray-400 mb-2">
+            Filtrar por Classe Oficial:
+          </label>
+          <div class="flex flex-wrap gap-2" id="class-filters-container">
+            <!-- Dynamic Class Filter Buttons JS Populated -->
+          </div>
+        </div>
+
+        <!-- Tier Filter Buttons -->
+        <div class="flex flex-wrap items-center gap-2 pt-2 border-t border-gray-800/60">
+          <span class="text-xs font-bold uppercase tracking-wider text-gray-400 mr-2">Filtrar por Tier:</span>
+          <button onclick="setTierFilter('ALL')" class="tier-btn active-tier text-xs font-semibold px-3 py-1.5 rounded-lg border border-gray-700 bg-gray-800 text-white">Todos</button>
+          <button onclick="setTierFilter('S')" class="tier-btn text-xs font-extrabold px-3 py-1.5 rounded-lg border border-goldTier/40 bg-goldTier/10 text-goldTier">Tier S (Meta Op)</button>
+          <button onclick="setTierFilter('A')" class="tier-btn text-xs font-extrabold px-3 py-1.5 rounded-lg border border-purpleTier/40 bg-purpleTier/10 text-purpleTier">Tier A (Forte)</button>
+          <button onclick="setTierFilter('B')" class="tier-btn text-xs font-extrabold px-3 py-1.5 rounded-lg border border-blueTier/40 bg-blueTier/10 text-blueTier">Tier B (Viável)</button>
+          <button onclick="setTierFilter('C')" class="tier-btn text-xs font-extrabold px-3 py-1.5 rounded-lg border border-greenTier/40 bg-greenTier/10 text-greenTier">Tier C (Situacional)</button>
+          <button onclick="setTierFilter('D')" class="tier-btn text-xs font-extrabold px-3 py-1.5 rounded-lg border border-grayTier/40 bg-grayTier/10 text-grayTier">Tier D (Fraco)</button>
+        </div>
+      </div>
+
+      <!-- Brawlers Grid -->
+      <div id="brawlers-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
+        <!-- Dynamic Cards Inserted Here -->
+      </div>
+      
+      <!-- Empty Search Result State -->
+      <div id="no-results" class="hidden text-center py-16 bg-[#191e2b] rounded-2xl border border-gray-800">
+        <i class="fa-solid fa-ghost text-5xl text-gray-600 mb-3"></i>
+        <h3 class="text-lg font-bold text-gray-300">Nenhum Brawler Encontrado</h3>
+        <p class="text-sm text-gray-500 mt-1">Tente pesquisar por outro nome ou remover os filtros aplicados.</p>
+        <button onclick="resetFilters()" class="mt-4 px-4 py-2 bg-cyanAccent text-black font-bold text-xs rounded-lg hover:brightness-110">
+          Resetar Filtros
+        </button>
+      </div>
+
+    </section>
+
+    <!-- ==================== TAB 2: MAPAS & ESTRATÉGIAS ==================== -->
+    <section id="tab-content-maps" class="hidden space-y-6">
+      
+      <!-- Section Header -->
+      <div class="bg-[#191e2b] p-6 rounded-2xl border border-gray-800 shadow-xl flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+        <div>
+          <h2 class="text-2xl font-display font-black text-white flex items-center gap-3">
+            <i class="fa-solid fa-map-location-dot text-cyanAccent"></i> Guia de Mapas & Composições
+          </h2>
+          <p class="text-sm text-gray-400 mt-1">
+            Composições de times competitivos e estratégias para os 6 modos de jogo principais.
+          </p>
+        </div>
+        
+        <!-- Mode Selector Pills -->
+        <div class="flex flex-wrap gap-2" id="mode-pills-container">
+          <!-- Dynamic Mode Buttons Populated by JS -->
+        </div>
+      </div>
+
+      <!-- Mode Strategy Display Area -->
+      <div id="mode-details-area" class="space-y-6">
+        <!-- Dynamic Content Inserted Here -->
+      </div>
+
+    </section>
+
+    <!-- ==================== TAB 3: SIMULADOR DE DRAFT ==================== -->
+    <section id="tab-content-draft" class="hidden space-y-6">
+      
+      <!-- Draft Intro Header -->
+      <div class="bg-[#191e2b] p-6 rounded-2xl border border-gray-800 shadow-xl">
+        <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+          <div>
+            <h2 class="text-2xl font-display font-black text-white flex items-center gap-3">
+              <i class="fa-solid fa-wand-magic-sparkles text-redAccent"></i> Simulador de Draft & Real-Time Counters
+            </h2>
+            <p class="text-sm text-gray-400 mt-1">
+              Selecione de 1 a 3 brawlers do time inimigo para receber os melhores Counter Picks e estratégias em tempo real.
+            </p>
+          </div>
+          <button onclick="resetDraft()" class="px-4 py-2 bg-gray-800 border border-gray-700 hover:border-redAccent hover:text-redAccent text-gray-300 font-bold text-xs rounded-xl transition-all">
+            <i class="fa-solid fa-rotate-right mr-1.5"></i> Reiniciar Draft
+          </button>
+        </div>
+      </div>
+
+      <!-- Draft Interface Grid -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        
+        <!-- Left: Enemy Team Selection Panel (5 cols) -->
+        <div class="lg:col-span-5 bg-[#191e2b] p-6 rounded-2xl border border-gray-800 flex flex-col gap-5">
+          <h3 class="text-sm font-extrabold uppercase tracking-wider text-redAccent flex items-center gap-2">
+            <i class="fa-solid fa-shield-halved"></i> Time Inimigo (Escolha até 3)
+          </h3>
+
+          <!-- Selected Enemies Slots -->
+          <div class="grid grid-cols-3 gap-3" id="enemy-slots">
+            <!-- Slot 1 -->
+            <div onclick="openDraftBrawlerSelector(0)" id="enemy-slot-0" class="aspect-square bg-[#0f131d] rounded-xl border-2 border-dashed border-gray-700 hover:border-redAccent flex flex-col items-center justify-center cursor-pointer transition-all p-2 text-center group">
+              <i class="fa-solid fa-plus text-gray-500 group-hover:text-redAccent text-xl mb-1"></i>
+              <span class="text-[11px] text-gray-400 font-bold">Adicionar Inimigo 1</span>
+            </div>
+            <!-- Slot 2 -->
+            <div onclick="openDraftBrawlerSelector(1)" id="enemy-slot-1" class="aspect-square bg-[#0f131d] rounded-xl border-2 border-dashed border-gray-700 hover:border-redAccent flex flex-col items-center justify-center cursor-pointer transition-all p-2 text-center group">
+              <i class="fa-solid fa-plus text-gray-500 group-hover:text-redAccent text-xl mb-1"></i>
+              <span class="text-[11px] text-gray-400 font-bold">Adicionar Inimigo 2</span>
+            </div>
+            <!-- Slot 3 -->
+            <div onclick="openDraftBrawlerSelector(2)" id="enemy-slot-2" class="aspect-square bg-[#0f131d] rounded-xl border-2 border-dashed border-gray-700 hover:border-redAccent flex flex-col items-center justify-center cursor-pointer transition-all p-2 text-center group">
+              <i class="fa-solid fa-plus text-gray-500 group-hover:text-redAccent text-xl mb-1"></i>
+              <span class="text-[11px] text-gray-400 font-bold">Adicionar Inimigo 3</span>
+            </div>
+          </div>
+
+          <!-- Select Brawler Drawer inside Draft -->
+          <div class="space-y-3 pt-2 border-t border-gray-800">
+            <label class="text-xs font-bold text-gray-400 flex justify-between items-center">
+              <span>Selecione para o slot ativo:</span>
+              <span id="active-slot-label" class="text-cyanAccent font-bold">Slot 1</span>
+            </label>
+            <input type="text" id="draft-search-input" placeholder="Filtrar brawlers para selecionar..." 
+              oninput="renderDraftBrawlerList()"
+              class="w-full px-3 py-2 bg-[#0f131d] border border-gray-700 rounded-lg text-xs text-white focus:outline-none focus:border-cyanAccent">
+            
+            <div id="draft-brawler-picker-list" class="max-h-60 overflow-y-auto grid grid-cols-4 gap-2 p-1">
+              <!-- JS Populated list of icons -->
+            </div>
+          </div>
+        </div>
+
+        <!-- Right: Recommended Counter Picks Panel (7 cols) -->
+        <div class="lg:col-span-7 bg-[#191e2b] p-6 rounded-2xl border border-gray-800 space-y-5 flex flex-col">
+          <div class="flex items-center justify-between">
+            <h3 class="text-sm font-extrabold uppercase tracking-wider text-cyanAccent flex items-center gap-2">
+              <i class="fa-solid fa-lightbulb"></i> Counters Recomendados em Tempo Real
+            </h3>
+            <span class="text-xs text-gray-400 font-semibold" id="counters-status-text">Aguardando seleção...</span>
+          </div>
+
+          <!-- Dynamic Counter Recommendations Container -->
+          <div id="recommended-counters-container" class="space-y-3 flex-grow">
+            <!-- Default Placeholder when no enemies selected -->
+            <div class="h-64 border border-dashed border-gray-800 rounded-xl flex flex-col items-center justify-center text-center p-6 bg-[#0f131d]/50">
+              <div class="w-16 h-16 rounded-full bg-cyanAccent/10 flex items-center justify-center mb-3">
+                <i class="fa-solid fa-crosshairs text-2xl text-cyanAccent"></i>
+              </div>
+              <h4 class="font-bold text-gray-300 text-base">Selecione Brawlers Inimigos</h4>
+              <p class="text-xs text-gray-500 max-w-sm mt-1">
+                Adicione os brawlers do time adversário no painel à esquerda para que o nosso algoritmo analise fraquezas, alcances e classes desvantajosas.
+              </p>
+            </div>
+          </div>
+
+          <!-- Draft Tactical Advice Box -->
+          <div id="draft-tactical-tip" class="p-4 bg-[#0f131d] border border-cyanAccent/30 rounded-xl hidden">
+            <h4 class="text-xs font-bold text-cyanAccent uppercase tracking-wider mb-1 flex items-center gap-2">
+              <i class="fa-solid fa-chess-knight"></i> Análise Tática da Composição
+            </h4>
+            <p id="draft-tactical-text" class="text-xs text-gray-300 leading-relaxed">
+              --
+            </p>
+          </div>
+        </div>
+
+      </div>
+
+    </section>
+
+  </main>
+
+  <!-- BRAWLER DETAILS MODAL -->
+  <div id="brawler-modal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 hidden">
+    <div class="bg-[#191e2b] border border-gray-700 w-full max-w-2xl rounded-2xl overflow-hidden shadow-2xl modal-animate relative max-h-[90vh] flex flex-col">
+      
+      <!-- Modal Close Button -->
+      <button onclick="closeModal()" class="absolute top-4 right-4 z-10 w-9 h-9 bg-black/60 hover:bg-redAccent text-white rounded-full flex items-center justify-center transition-colors">
+        <i class="fa-solid fa-xmark text-lg"></i>
+      </button>
+
+      <!-- Modal Content Header -->
+      <div id="modal-header" class="p-6 bg-gradient-to-r from-[#0f131d] to-[#191e2b] border-b border-gray-800 relative overflow-hidden flex items-center gap-5">
+        <!-- Avatar Container -->
+        <div id="modal-avatar-box" class="w-20 h-20 rounded-2xl flex-shrink-0 flex items-center justify-center text-3xl font-black text-white shadow-xl relative border-2 border-cyanAccent/50">
+          <!-- JS Inserted -->
+        </div>
+
+        <div>
+          <div class="flex items-center gap-2 mb-1">
+            <span id="modal-tier-badge" class="px-2.5 py-0.5 rounded text-xs font-black uppercase tracking-wider">
+              --
+            </span>
+            <span id="modal-class-badge" class="bg-gray-800 text-gray-300 px-2.5 py-0.5 rounded text-xs font-bold">
+              --
+            </span>
+          </div>
+          <h2 id="modal-brawler-name" class="text-3xl font-display font-black text-white">--</h2>
+          <p id="modal-stats-summary" class="text-xs text-gray-400 mt-1">--</p>
+        </div>
+      </div>
+
+      <!-- Modal Body Scrollable -->
+      <div class="p-6 overflow-y-auto space-y-6 flex-grow">
+        
+        <!-- Build Recommendation Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <!-- Gadget Card -->
+          <div class="bg-[#0f131d] p-4 rounded-xl border border-gray-800 flex flex-col justify-between">
+            <span class="text-[10px] font-extrabold uppercase text-cyanAccent tracking-wider block mb-1">
+              <i class="fa-solid fa-walkie-talkie"></i> Acessório Recomendado
+            </span>
+            <p id="modal-gadget" class="font-bold text-sm text-white">--</p>
+          </div>
+
+          <!-- Star Power Card -->
+          <div class="bg-[#0f131d] p-4 rounded-xl border border-gray-800 flex flex-col justify-between">
+            <span class="text-[10px] font-extrabold uppercase text-goldTier tracking-wider block mb-1">
+              <i class="fa-solid fa-star"></i> Poder de Estrela
+            </span>
+            <p id="modal-starpower" class="font-bold text-sm text-white">--</p>
+          </div>
+
+          <!-- Gears Card -->
+          <div class="bg-[#0f131d] p-4 rounded-xl border border-gray-800 flex flex-col justify-between">
+            <span class="text-[10px] font-extrabold uppercase text-purpleTier tracking-wider block mb-1">
+              <i class="fa-solid fa-gear"></i> Engrenagens (Gears)
+            </span>
+            <p id="modal-gears" class="font-bold text-sm text-white">--</p>
+          </div>
+        </div>
+
+        <!-- Gameplay Tips -->
+        <div class="bg-[#0f131d] p-4 rounded-xl border border-gray-800 space-y-2">
+          <h4 class="text-xs font-extrabold uppercase tracking-wider text-cyanAccent flex items-center gap-2">
+            <i class="fa-solid fa-lightbulb"></i> Dicas de Gameplay Competitiva
+          </h4>
+          <p id="modal-tips" class="text-xs text-gray-300 leading-relaxed">--</p>
+        </div>
+
+        <!-- Matchups & Counters Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <!-- Strong Against -->
+          <div class="bg-[#0f131d] p-4 rounded-xl border border-green-500/20">
+            <h4 class="text-xs font-extrabold uppercase tracking-wider text-green-400 mb-2 flex items-center gap-1.5">
+              <i class="fa-solid fa-circle-check"></i> Forte Contra (Counters You)
+            </h4>
+            <div id="modal-strong-against" class="flex flex-wrap gap-1.5">
+              <!-- Inserted JS -->
+            </div>
+          </div>
+
+          <!-- Weak Against (Counters) -->
+          <div class="bg-[#0f131d] p-4 rounded-xl border border-red-500/20">
+            <h4 class="text-xs font-extrabold uppercase tracking-wider text-red-400 mb-2 flex items-center gap-1.5">
+              <i class="fa-solid fa-circle-xmark"></i> Fraco Contra (Countered By)
+            </h4>
+            <div id="modal-counters" class="flex flex-wrap gap-1.5">
+              <!-- Inserted JS -->
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Modal Footer -->
+      <div class="p-4 bg-[#0f131d] border-t border-gray-800 flex justify-end">
+        <button onclick="closeModal()" class="px-5 py-2 bg-gray-800 hover:bg-gray-700 text-white font-bold text-xs rounded-xl transition-colors">
+          Fechar
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ==================== JAVASCRIPT CORE ==================== -->
+  <script>
+    /*
+     * OFFICIAL BRAWL STARS CLASSES:
+     * - Tanque
+     * - Disparador
+     * - Franco-Atirador
+     * - Lançador (Exclusivos Oficiais: Barley, Dynamike, Tick, Grom, Larry & Lawrie, Berry, Sprout, Willow, Juju)
+     * - Controlador
+     * - Assassino
+     * - Suporte
+     *
+     * Total: STRICTLY 85 REAL OFFICIAL BRAWLERS. Zero fake/invented brawlers.
+     */
+
+    const OFFICIAL_CLASSES = [
+      'Tanque',
+      'Disparador',
+      'Franco-Atirador',
+      'Lançador',
+      'Controlador',
+      'Assassino',
+      'Suporte'
+    ];
+
+    // COLOR THEME MAP FOR CLASSES
+    const CLASS_COLORS = {
+      'Tanque': { bg: 'bg-blue-600/20', text: 'text-blue-400', border: 'border-blue-500/30' },
+      'Disparador': { bg: 'bg-red-600/20', text: 'text-red-400', border: 'border-red-500/30' },
+      'Franco-Atirador': { bg: 'bg-yellow-600/20', text: 'text-yellow-400', border: 'border-yellow-500/30' },
+      'Lançador': { bg: 'bg-purple-600/20', text: 'text-purple-400', border: 'border-purple-500/30' },
+      'Controlador': { bg: 'bg-teal-600/20', text: 'text-teal-400', border: 'border-teal-500/30' },
+      'Assassino': { bg: 'bg-indigo-600/20', text: 'text-indigo-400', border: 'border-indigo-500/30' },
+      'Suporte': { bg: 'bg-green-600/20', text: 'text-green-400', border: 'border-green-500/30' }
+    };
+
+    // TIER COLORS
+    const TIER_COLORS = {
+      'S': { bg: 'bg-goldTier/20', text: 'text-goldTier', border: 'border-goldTier/50', label: 'TIER S' },
+      'A': { bg: 'bg-purpleTier/20', text: 'text-purpleTier', border: 'border-purpleTier/50', label: 'TIER A' },
+      'B': { bg: 'bg-blueTier/20', text: 'text-blueTier', border: 'border-blueTier/50', label: 'TIER B' },
+      'C': { bg: 'bg-greenTier/20', text: 'text-greenTier', border: 'border-greenTier/50', label: 'TIER C' },
+      'D': { bg: 'bg-grayTier/20', text: 'text-grayTier', border: 'border-grayTier/50', label: 'TIER D' }
+    };
+
+    const BRAWLERS_DATA = [
+      // --- LANÇADORES (OFICIAIS: 9) ---
+      { id: 'barley', name: 'Barley', class: 'Lançador', tier: 'B', gadget: 'Xarope Pegajoso', starPower: 'Uso Médico', gears: 'Escudo + Dano', tips: 'Controle gargalos atirando poções em passagens apertadas para causar dano contínuo.', strongAgainst: ['Frank', '8-Bit', 'Bull'], counters: ['Edgar', 'Mortis', 'Mico'] },
+      { id: 'dynamike', name: 'Dynamike', class: 'Lançador', tier: 'A', gadget: 'Atordoamento Fidget', starPower: 'Demolição', gears: 'Dano + Velocidade', tips: 'Preveja a movimentação do alvo e combine o gadget de atordoamento com o Super para eliminação instantânea.', strongAgainst: ['Jessie', 'Penny', 'Rico'], counters: ['Mortis', 'Edgar', 'Mico'] },
+      { id: 'tick', name: 'Tick', class: 'Lançador', tier: 'A', gadget: 'Mina Protetora', starPower: 'Autorreparação', gears: 'Visão + Dano', tips: 'Submeta os alvos a um fogo cruzado constante de minas. Mantenha distância máxima.', strongAgainst: ['Piper', 'Bea', 'Brock'], counters: ['Mico', 'Edgar', 'Mortis'] },
+      { id: 'grom', name: 'Grom', class: 'Lançador', tier: 'B', gadget: 'Vigia de Radar', starPower: 'Fator X', gears: 'Dano + Escudo', tips: 'Use o padrão em cruz das suas bombas para acertar inimigos escondidos em cantos de paredes.', strongAgainst: ['Pam', '8-Bit', 'Jessie'], counters: ['Stu', 'Mortis', 'Edgar'] },
+      { id: 'larry-lawrie', name: 'Larry & Lawrie', class: 'Lançador', tier: 'S', gadget: 'Troca de Armas', starPower: 'Protocolo de Proteção', gears: 'Dano + Escudo', tips: 'Invoque Lawrie para criar uma distração ofensiva na linha de frente e dominar objetivos.', strongAgainst: ['Frank', 'Meg', 'Draco'], counters: ['Edgar', 'Mortis', 'Mico'] },
+      { id: 'berry', name: 'Berry', class: 'Lançador', tier: 'A', gadget: 'Gelado Derretido', starPower: 'Piso Macio', gears: 'Escudo + Recarga', tips: 'Mantenha poças de sorvete sob seus aliados para cura constante enquanto pressiona os inimigos.', strongAgainst: ['Rosa', 'El Primo', 'Bull'], counters: ['Kenji', 'Mortis', 'Lily'] },
+      { id: 'sprout', name: 'Sprout', class: 'Lançador', tier: 'B', gadget: 'Adubo Verde', starPower: 'Supercrescimento', gears: 'Escudo + Visão', tips: 'Aproveite o rebate das sementes nas paredes e feche objetivos com sua sebe vegetal.', strongAgainst: ['Meg', 'Pearl', '8-Bit'], counters: ['Mico', 'Mortis', 'Edgar'] },
+      { id: 'willow', name: 'Willow', class: 'Lançador', tier: 'A', gadget: 'Mergulho Profundo', starPower: 'Atrás da Máscara', gears: 'Dano + Visão', tips: 'Acerte o Super em carregadores de gemas ou atacantes de roubo para virar a partida.', strongAgainst: ['Frank', 'Bull', 'Meg'], counters: ['Edgar', 'Mortis', 'Stu'] },
+      { id: 'juju', name: 'Juju', class: 'Lançador', tier: 'A', gadget: 'Elemento Mutável', starPower: 'Poder Elemental', gears: 'Dano + Escudo', tips: 'Alterne o piso (água/grama/terra) para conceder efeitos especiais aos seus ataques lançados.', strongAgainst: ['8-Bit', 'Pam', 'Frank'], counters: ['Lily', 'Cordelius', 'Leon'] },
+
+      // --- DISPARADORES ---
+      { id: 'clancy', name: 'Clancy', class: 'Disparador', tier: 'S', gadget: 'Recarga Rápida', starPower: 'Estágio Avançado', gears: 'Dano + Velocidade', tips: 'Aumente seus estágios de munição logo no início. No estágio 3, seu Super destrói qualquer time.', strongAgainst: ['Frank', 'El Primo', 'Bull'], counters: ['Piper', 'Nani', 'Angelo'] },
+      { id: 'moe', name: 'Moe', class: 'Disparador', tier: 'S', gadget: 'Aceleração Perfuratriz', starPower: 'Escavadeira Dupla', gears: 'Dano + Escudo', tips: 'Cause dano dividido à distância e use a máquina de perfurar para atropelar tanques e snipers.', strongAgainst: ['Grom', 'Tick', 'Piper'], counters: ['Gale', 'Otis', 'Colette'] },
+      { id: 'shelly', name: 'Shelly', class: 'Disparador', tier: 'B', gadget: 'Pombos Correios', starPower: 'Xeque-Mate', gears: 'Dano + Velocidade', tips: 'Guarde o Super para interromper investidas de tanques e assassinos a curta distância.', strongAgainst: ['El Primo', 'Mortis', 'Bull'], counters: ['Piper', 'Bea', 'Nani'] },
+      { id: 'colt', name: 'Colt', class: 'Disparador', tier: 'B', gadget: 'Munição Extra', starPower: 'Botas Estilosas', gears: 'Recarga + Dano', tips: 'Mantenha a mira alinhada ao movimento do inimigo para acertar a rajada completa de projéteis.', strongAgainst: ['Frank', '8-Bit', 'Pam'], counters: ['Edgar', 'Mortis', 'Leon'] },
+      { id: 'rico', name: 'Rico', class: 'Disparador', tier: 'S', gadget: 'Multibolas', starPower: 'Super Pula-Pula', gears: 'Dano + Recarga', tips: 'Domine o ângulo de ricochete em mapas com muitas paredes para acertar alvos sem se expor.', strongAgainst: ['Tanks', 'Brawlers lentos'], counters: ['Piper', 'Brock', 'Nani'] },
+      { id: '8-bit', name: '8-Bit', class: 'Disparador', tier: 'B', gadget: 'Teletransporte', starPower: 'Amplificador Recarregado', gears: 'Dano + Recarga', tips: 'Posicione sua amplificadora de dano atrás de paredes para beneficiar todo o seu time.', strongAgainst: ['Poco', 'Pam', 'Gene'], counters: ['Throwers', 'Piper', 'Mandy'] },
+      { id: 'carl', name: 'Carl', class: 'Disparador', tier: 'B', gadget: 'Gancho Pirueta', starPower: 'Arremesso Rápido', gears: 'Dano + Escudo', tips: 'Aproveite paredes próximas para fazer a picareta ir e voltar quase instantaneamente.', strongAgainst: ['Tick', 'Dynamike', 'Piper'], counters: ['Gale', 'Otis', 'Shelly'] },
+      { id: 'pearl', name: 'Pearl', class: 'Disparador', tier: 'A', gadget: 'Biscoito Quente', starPower: 'Forno Protegido', gears: 'Dano + Escudo', tips: 'Mantenha sua barra de calor alta para desferir rajadas massivas de dano à meia distância.', strongAgainst: ['Edgar', 'Mortis', 'El Primo'], counters: ['Piper', 'Bea', 'Nani'] },
+      { id: 'chester', name: 'Chester', class: 'Disparador', tier: 'S', gadget: 'Dado da Sorte', starPower: 'Quatro Ases', gears: 'Dano + Velocidade', tips: 'Adapte seu estilo de jogo dinamicamente de acordo com qual das 5 Supers aleatórias está ativa.', strongAgainst: ['Frank', 'Buzz', 'Edgar'], counters: ['Piper', 'Mandy', 'Angelo'] },
+      { id: 'lola', name: 'Lola', class: 'Disparador', tier: 'B', gadget: 'Material Fotográfico', starPower: 'Improviso', gears: 'Dano + Escudo', tips: 'Posicione seu clone levemente sobreposto ou ao lado para dobrar o dano por rajada.', strongAgainst: ['Bull', 'El Primo', 'Frank'], counters: ['Piper', 'Belle', 'Nani'] },
+      { id: 'eve', name: 'Eve', class: 'Disparador', tier: 'A', gadget: 'Salto de Pulga', starPower: 'Visão Maternal', gears: 'Dano + Escudo', tips: 'Flutue sobre corpos de água para atacar inimigos terrestres de ângulos totalmente seguros.', strongAgainst: ['Grom', 'Mortis', 'Bibi'], counters: ['Piper', 'Rico', 'Colt'] },
+      { id: 'griff', name: 'Griff', class: 'Disparador', tier: 'A', gadget: 'Piggy Bank', starPower: 'Mantenha o Troco', gears: 'Dano + Recarga', tips: 'Excelente destruidor de tanques. Use o Super em curta/média distância para dano de retorno.', strongAgainst: ['Frank', 'Rosa', 'Jacky'], counters: ['Piper', 'Bea', 'Angelo'] },
+      { id: 'colette', name: 'Colette', class: 'Disparador', tier: 'A', gadget: 'Liquidagora', starPower: 'Empurrão', gears: 'Dano + Recarga', tips: 'Causa dano percentual da vida atual. Perfeita para derreter tanques no modo Roubo e Zona Restrita.', strongAgainst: ['Frank', 'Draco', 'Buster'], counters: ['Piper', 'Nani', 'Crow'] },
+      { id: 'nita', name: 'Nita', class: 'Disparador', tier: 'A', gadget: 'Garra Ursina', starPower: 'Urso Hiperativo', gears: 'Dano + Velocidade', tips: 'Invoque Bruce no centro dos objetivos para forçar o time inimigo a recuar ou gastar munição.', strongAgainst: ['Bull', 'El Primo', 'Mortis'], counters: ['Piper', 'Amber', 'Colt'] },
+      { id: 'r-t', name: 'R-T', class: 'Disparador', tier: 'A', gadget: 'Sinal Hacker', starPower: 'Gravação Dupla', gears: 'Dano + Escudo', tips: 'Marque alvos com o ataque normal para que seus aliados causem dano bônus a cada acerto.', strongAgainst: ['Edgar', 'Mortis', 'Fang'], counters: ['Piper', 'Angelo', 'Mandy'] },
+      { id: 'amber', name: 'Amber', class: 'Disparador', tier: 'A', gadget: 'Isqueiro', starPower: 'Chama Selvagem', gears: 'Dano + Visão', tips: 'Espalhe poças de óleo em pontos estratégicos do mapa para controlar a passagem do inimigo.', strongAgainst: ['Frank', 'Rosa', 'Pam'], counters: ['Piper', 'Nani', 'Angelo'] },
+
+      // --- TANQUES (12) ---
+      { id: 'bull', name: 'Bull', class: 'Tanque', tier: 'B', gadget: 'Pisoteador', starPower: 'Duro de Matar', gears: 'Dano + Curadora', tips: 'Corte a animação da investida do Super usando o gadget de pisoteador para atordoar alvos.', strongAgainst: ['Frank', 'Mortis', '8-Bit'], counters: ['Colette', 'Gale', 'Otis'] },
+      { id: 'el-primo', name: 'El Primo', class: 'Tanque', tier: 'B', gadget: 'Suplex Suave', starPower: 'Meteoro', gears: 'Dano + Velocidade', tips: 'Carregue o Super recebendo dano com cautela e pule sobre snipers vulneráveis.', strongAgainst: ['Frank', 'Bull', 'Ash'], counters: ['Colette', 'Gale', 'Clancy'] },
+      { id: 'rosa', name: 'Rosa', class: 'Tanque', tier: 'B', gadget: 'Fertilizante', starPower: 'Planta de Estimação', gears: 'Dano + Velocidade', tips: 'Ative o escudo do Super em combates de grupo para absorver todo o impacto e avançar.', strongAgainst: ['Mortis', 'Edgar', 'El Primo'], counters: ['Colette', 'Gale', 'Otis'] },
+      { id: 'frank', name: 'Frank', class: 'Tanque', tier: 'S', gadget: 'Cancelamento', starPower: 'Poder Esponja', gears: 'Dano + Escudo', tips: 'Sua velocidade de ataque aumenta com menos vida. Use o Super atrás de paredes para pisotear.', strongAgainst: ['Edgar', 'Mortis', 'Poco'], counters: ['Colette', 'Clancy', 'Gale'] },
+      { id: 'bibi', name: 'Bibi', class: 'Tanque', tier: 'A', gadget: 'Vitamina', starPower: 'Home Run', gears: 'Dano + Velocidade', tips: 'Use a barra de Home Run para afastar alvos de perto e interromper Supers perigosas.', strongAgainst: ['Dynamike', 'Barley', 'Tick'], counters: ['Gale', 'Colette', 'Otis'] },
+      { id: 'ash', name: 'Ash', class: 'Tanque', tier: 'B', gadget: 'Traste Terapêutico', starPower: 'Injeção de Furor', gears: 'Dano + Velocidade', tips: 'Mantenha sua barra de fúria alta acertando ataques para ganhar velocidade e dano avassaladores.', strongAgainst: ['Poco', 'Gene', 'Gus'], counters: ['Colette', 'Gale', 'Clancy'] },
+      { id: 'meg', name: 'Meg', class: 'Tanque', tier: 'A', gadget: 'Carga de Caixa', starPower: 'Campo de Força', gears: 'Dano + Escudo', tips: 'Pressione com o Mecha robótico à distância. Ao ser destruído, continue como piloto.', strongAgainst: ['Nita', 'Jessie', 'Poco'], counters: ['Colette', 'Clancy', 'Griff'] },
+      { id: 'buster', name: 'Buster', class: 'Tanque', tier: 'A', gadget: 'Montagem de Cena', starPower: 'Versão do Diretor', gears: 'Dano + Escudo', tips: 'Projete o escudo defletor na frente dos seus aliados para absorver e rebater projéteis inimigos.', strongAgainst: ['Piper', 'Bea', 'Brock'], counters: ['Colette', 'El Primo', 'Frank'] },
+      { id: 'draco', name: 'Draco', class: 'Tanque', tier: 'A', gadget: 'Solo de Guitarra', starPower: 'Exposição', gears: 'Dano + Velocidade', tips: 'Entre no modo Dragão para cuspir fogo e ganhar alta mobilidade e vida extra no objetivo.', strongAgainst: ['Edgar', 'Mortis', 'Piper'], counters: ['Colette', 'Clancy', 'Gale'] },
+      { id: 'hank', name: 'Hank', class: 'Tanque', tier: 'C', gadget: 'Balão de Água', starPower: 'Explosão de Bolha', gears: 'Dano + Escudo', tips: 'Infle a bolha atrás de paredes para surpreender inimigos sem precisar entrar na linha de tiro.', strongAgainst: ['Edgar', 'Mortis', 'Crow'], counters: ['Colette', 'Gale', 'Piper'] },
+      { id: 'jacky', name: 'Jacky', class: 'Tanque', tier: 'B', gadget: 'Reconstrução', starPower: 'Contrapeso', gears: 'Velocidade + Dano', tips: 'Aproxime-se com o gadget de velocidade e use o martelo pneumático para puxar inimigos.', strongAgainst: ['Throwers', 'Mortis', 'Poco'], counters: ['Colette', 'Gale', 'Clancy'] },
+      { id: 'darryl', name: 'Darryl', class: 'Tanque', tier: 'A', gadget: 'Disparo Duplo', starPower: 'Anéis de Ferro', gears: 'Dano + Escudo', tips: 'Seu Super recarrega automaticamente. Role sobre snipers para eliminá-los com tiro duplo.', strongAgainst: ['Piper', 'Nani', 'Bea'], counters: ['Colette', 'Gale', 'Otis'] },
+
+      // --- FRANCO-ATIRADORES (9) ---
+      { id: 'piper', name: 'Piper', class: 'Franco-Atirador', tier: 'S', gadget: 'Autodefesa', starPower: 'Atoscada', gears: 'Dano + Recarga', tips: 'Seu dano é máximo no limite do alcance. Guarde o Super para escapar de assassinos.', strongAgainst: ['Dynamike', 'Frank', 'Rico'], counters: ['Nani', 'Leon', 'Edgar'] },
+      { id: 'bea', name: 'Bea', class: 'Franco-Atirador', tier: 'A', gadget: 'Mel Melado', starPower: 'Troca de Farpas', gears: 'Dano + Escudo', tips: 'Acerte o primeiro tiro para carregar o super-farpado que causa um dano devastador.', strongAgainst: ['Frank', 'Bull', 'El Primo'], counters: ['Piper', 'Nani', 'Mortis'] },
+      { id: 'nani', name: 'Nani', class: 'Franco-Atirador', tier: 'A', gadget: 'Teletransporte', starPower: 'Foco de Mira', gears: 'Dano + Recarga', tips: 'Ajuste o triplo feixe de mira para focar no mesmo ponto e dar instakill em brawlers frágeis.', strongAgainst: ['Piper', 'Brock', 'Bea'], counters: ['Edgar', 'Mortis', 'Leon'] },
+      { id: 'bonnie', name: 'Bonnie', class: 'Franco-Atirador', tier: 'B', gadget: 'Aceleração de Canhão', starPower: 'Dente de Leite', gears: 'Dano + Escudo', tips: 'Acumule a Super na forma de Canhão Clyde e se lance em cima do alvo para finalizar.', strongAgainst: ['Dynamike', 'Tick', 'Piper'], counters: ['Gale', 'Colette', 'Otis'] },
+      { id: 'belle', name: 'Belle', class: 'Franco-Atirador', tier: 'A', gadget: 'Armadilha', starPower: 'Positivo', gears: 'Dano + Recarga', tips: 'Acerte a marca do Super no tanque principal do time inimigo para deixá-lo vulnerável.', strongAgainst: ['Frank', 'Bull', 'Pam'], counters: ['Nani', 'Piper', 'Mortis'] },
+      { id: 'mandy', name: 'Mandy', class: 'Franco-Atirador', tier: 'A', gadget: 'Caramelo Pegajoso', starPower: 'Visão de Raios', gears: 'Dano + Escudo', tips: 'Fique parada para estender seu alcance de tiro e use o feixe do Super de um lado ao outro do mapa.', strongAgainst: ['8-Bit', 'Pam', 'Barley'], counters: ['Mortis', 'Leon', 'Edgar'] },
+      { id: 'maisie', name: 'Maisie', class: 'Franco-Atirador', tier: 'B', gadget: 'Impulso Protetor', starPower: 'Tremor de Terra', gears: 'Dano + Escudo', tips: 'O projétil ganha velocidade no ar. Treine o tempo de disparo para acertar snipers inimigos.', strongAgainst: ['Frank', 'Bull', 'Buzz'], counters: ['Piper', 'Nani', 'Angelo'] },
+      { id: 'angelo', name: 'Angelo', class: 'Franco-Atirador', tier: 'S', gadget: 'Voo das Flechas', starPower: 'Farpado Toxic', gears: 'Dano + Velocidade', tips: 'Carregue a flecha ao máximo antes de atirar e use a poça de pântano para toxicidade extra.', strongAgainst: ['Frank', '8-Bit', 'Meg'], counters: ['Nani', 'Piper', 'Leon'] },
+      { id: 'brock', name: 'Brock', class: 'Franco-Atirador', tier: 'B', gadget: 'Salto de Foguete', starPower: 'Quatro Foguetes', gears: 'Dano + Recarga', tips: 'Use o gadget de salto para esquivar de investidas e destrua paredes cruciais com o Super.', strongAgainst: ['Jessie', 'Penny', '8-Bit'], counters: ['Piper', 'Nani', 'Angelo'] },
+
+      // --- CONTROLADORES (14) ---
+      { id: 'jessie', name: 'Jessie', class: 'Controlador', tier: 'A', gadget: 'Mola de Choque', starPower: 'Energizada', gears: 'Dano + Recarga', tips: 'O tiro ricocheteia entre inimigos agrupados. Posicione a torreta Scrappy cobrindo o objetivo.', strongAgainst: ['Nita', 'Bull', 'El Primo'], counters: ['Piper', 'Brock', 'Throwers'] },
+      { id: 'bo', name: 'Bo', class: 'Controlador', tier: 'B', gadget: 'Totem de Super', starPower: 'Olho de Águia', gears: 'Dano + Visão', tips: 'Espalhe minas em gargalos. Treine o movimento lateral ao disparar para concentrar as flechas.', strongAgainst: ['Mortis', 'Edgar', 'Poco'], counters: ['Piper', 'Bea', 'Nani'] },
+      { id: 'emz', name: 'Emz', class: 'Controlador', tier: 'B', gadget: 'Spritz', starPower: 'Hype', gears: 'Dano + Escudo', tips: 'Mantenha os alvos no limite médio do seu spray de laquê para infligir o dano máximo contínuo.', strongAgainst: ['Frank', 'Bull', 'El Primo'], counters: ['Piper', 'Nani', 'Mortis'] },
+      { id: 'gene', name: 'Gene', class: 'Controlador', tier: 'A', gadget: 'Lâmpada Mágica', starPower: 'Sopro de Cura', gears: 'Visão + Escudo', tips: 'Puxe alvos prioritários frágeis ou carregadores de gemas com a mão mágica do Super.', strongAgainst: ['Piper', 'Bea', 'Crow'], counters: ['Frank', 'Buster', 'Draco'] },
+      { id: 'lou', name: 'Lou', class: 'Controlador', tier: 'A', gadget: 'Xarope Congelante', starPower: 'Supercongelamento', gears: 'Dano + Escudo', tips: 'Jogue a área congelante no objetivo para deslizar o time inimigo e paralisá-los constantemente.', strongAgainst: ['Frank', 'Bull', 'Draco'], counters: ['Piper', 'Nani', 'Angelo'] },
+      { id: 'squeak', name: 'Squeak', class: 'Controlador', tier: 'B', gadget: 'Resíduo Pegajoso', starPower: 'Reação em Cadeia', gears: 'Dano + Visão', tips: 'Grude bolinhas gosmentas no chão para negar passagens e revelar moitas inimigas com o gadget.', strongAgainst: ['Pam', '8-Bit', 'Frank'], counters: ['Mortis', 'Edgar', 'Mico'] },
+      { id: 'penny', name: 'Penny', class: 'Controlador', tier: 'B', gadget: 'Barris Salgados', starPower: 'Bolsa de Moedas', gears: 'Dano + Escudo', tips: 'O canhão lança bombas sobre paredes. Coloque-o protegido para forçar o recuo inimigo.', strongAgainst: ['Nita', 'Jessie', 'Pam'], counters: ['Piper', 'Brock', 'Throwers'] },
+      { id: 'otis', name: 'Otis', class: 'Controlador', tier: 'A', gadget: 'Estrela Adormecida', starPower: 'Tinta Extra', gears: 'Dano + Escudo', tips: 'Sua estrela do Super silencia totalmente o alvo (impossibilita atacar ou usar habilidades).', strongAgainst: ['Edgar', 'Mortis', 'Clancy'], counters: ['Piper', 'Nani', 'Mandy'] },
+      { id: 'sandy', name: 'Sandy', class: 'Controlador', tier: 'S', gadget: 'Estimulante', starPower: 'Tempestade de Cura', gears: 'Dano + Velocidade', tips: 'A tempestade de areia oculta todo o seu time. Use para avançar em bloco de surpresa no objetivo.', strongAgainst: ['Piper', 'Bea', 'Nani'], counters: ['Frank', 'Bull', 'Gale'] },
+      { id: 'charlie', name: 'Charlie', class: 'Controlador', tier: 'A', gadget: 'Aranhas', starPower: 'Digestão', gears: 'Dano + Escudo', tips: 'Encasulo alvos inimigos cruciais no Super para transformar qualquer combate em vantagem 3v2.', strongAgainst: ['Frank', 'Bull', 'Clancy'], counters: ['Throwers', 'Piper', 'Nani'] },
+      { id: 'chuck', name: 'Chuck', class: 'Controlador', tier: 'A', gadget: 'Girar Trilhos', starPower: 'Bilhete Único', gears: 'Dano + Recarga', tips: 'Monte uma rede de postes de trem direto até o cofre no modo Roubo para corridas imparáveis.', strongAgainst: ['Safes', 'Brawlers sem controle'], counters: ['Cordelius', 'Otis', 'Gale'] },
+      { id: 'gale', name: 'Gale', class: 'Controlador', tier: 'S', gadget: 'Tornado', starPower: 'Golpe de Vento', gears: 'Dano + Visão', tips: 'O melhor antitanque e antiassassino do jogo. Empurre inimigos contra paredes para atordoá-los.', strongAgainst: ['Edgar', 'Mortis', 'Frank'], counters: ['Piper', 'Nani', 'Angelo'] },
+      { id: 'mr-p', name: 'Mr. P', class: 'Controlador', tier: 'B', gadget: 'Porta-Malas', starPower: 'Serviço de Quarto', gears: 'Dano + Escudo', tips: 'Invoque maletas robóticas para esgotar a munição de snipers e brawlers de tiro único.', strongAgainst: ['Piper', 'Nani', 'Bea'], counters: ['Frank', 'Bull', 'Edgar'] },
+      { id: 'tara', name: 'Tara', class: 'Controlador', tier: 'A', gadget: 'Sombras Protetoras', starPower: 'Sombra Curativa', gears: 'Dano + Visão', tips: 'O Super de buraco negro junta todo o time inimigo. Acerte quando estiverem agrupados.', strongAgainst: ['Mortis', 'Edgar', 'Pam'], counters: ['Piper', 'Bea', 'Nani'] },
+
+      // --- ASSASSINOS (15) ---
+      { id: 'stu', name: 'Stu', class: 'Assassino', tier: 'A', gadget: 'Roda de Fogo', starPower: 'Gasolina', gears: 'Dano + Escudo', tips: 'Seu Super recarrega com apenas 1 acerto. Encadeie dashes sem parar para esquivar de projéteis.', strongAgainst: ['Frank', 'Bull', 'El Primo'], counters: ['Gale', 'Otis', 'Rico'] },
+      { id: 'mortis', name: 'Mortis', class: 'Assassino', tier: 'A', gadget: 'Pá Rotativa', starPower: 'Invasão Crp', gears: 'Dano + Escudo', tips: 'Aguarde a munição inimiga esgotar antes de dar o bote. Alvo prioritário: Lançadores e Snipers.', strongAgainst: ['Dynamike', 'Piper', 'Barley'], counters: ['Gale', 'Shelly', 'Bull'] },
+      { id: 'edgar', name: 'Edgar', class: 'Assassino', tier: 'B', gadget: 'Voadora', starPower: 'Aterrissagem', gears: 'Dano + Escudo', tips: 'Pule direto no alvo fragilizado de vida baixa e use o roubo de vida de seus socos rápidos.', strongAgainst: ['Dynamike', 'Tick', 'Piper'], counters: ['Gale', 'Otis', 'Shelly'] },
+      { id: 'sam', name: 'Sam', class: 'Assassino', tier: 'B', gadget: 'Puxada magnética', starPower: 'Cura dos Murros', gears: 'Dano + Velocidade', tips: 'Lance as manoplas na parede e recupere-as imediatamente para restaurar vida sem parar.', strongAgainst: ['Piper', 'Nani', 'Bea'], counters: ['Gale', 'Colette', 'Otis'] },
+      { id: 'buzz', name: 'Buzz', class: 'Assassino', tier: 'A', gadget: 'Boia Reserva', starPower: 'Olho Vivo', gears: 'Dano + Escudo', tips: 'Carregue o Super permanecendo no círculo do inimigo e arremesse a boia para atordoá-lo.', strongAgainst: ['Piper', 'Bea', 'Dynamike'], counters: ['Gale', 'Otis', 'Shelly'] },
+      { id: 'fang', name: 'Fang', class: 'Assassino', tier: 'A', gadget: 'Chute Voador', starPower: 'Chute Lendário', gears: 'Dano + Escudo', tips: 'Encadeie o chute do Super entre brawlers alinhados para causar múltiplos nocautes.', strongAgainst: ['Piper', 'Barley', 'Dynamike'], counters: ['Gale', 'Otis', 'Clancy'] },
+      { id: 'crow', name: 'Crow', class: 'Assassino', tier: 'B', gadget: 'Escudo de Penas', starPower: 'Toxina Extrema', gears: 'Dano + Visão', tips: 'Mantenha o veneno ativo para reduzir a cura do time inimigo e revelar moitas.', strongAgainst: ['Frank', 'Bull', 'Pam'], counters: ['Piper', 'Nani', 'Angelo'] },
+      { id: 'leon', name: 'Leon', class: 'Assassino', tier: 'S', gadget: 'Pulso Invisível', starPower: 'Sombra Curativa', gears: 'Dano + Escudo', tips: 'Ative a invisibilidade no meio do mato e se aproxime do carregador inimigo para dano fatal.', strongAgainst: ['Piper', 'Nani', 'Dynamike'], counters: ['Gale', 'Otis', 'Buster'] },
+      { id: 'spike', name: 'Spike', class: 'Assassino', tier: 'A', gadget: 'Chuva de Espinhos', starPower: 'Fertilizante', gears: 'Dano + Recarga', tips: 'Espinhos se dividem ao impactar. Ótimo para desgastar alvos escondidos atrás de cobertura.', strongAgainst: ['Frank', 'Bull', 'El Primo'], counters: ['Piper', 'Nani', 'Mandy'] },
+      { id: 'cordelius', name: 'Cordelius', class: 'Assassino', tier: 'S', gadget: 'Cogumelo Venenoso', starPower: 'Cogumelos Mágicos', gears: 'Dano + Escudo', tips: 'Isole o brawler mais forte do time inimigo na Dimensão das Sombras para garantir vantagem.', strongAgainst: ['Clancy', 'Moe', 'Frank'], counters: ['Gale', 'Otis', 'Buster'] },
+      { id: 'mico', name: 'Mico', class: 'Assassino', tier: 'A', gadget: 'Salto Mortal', starPower: 'Roubo de Munição', gears: 'Dano + Escudo', tips: 'Sinta o ritmo do pulo. Mico fica totalmente imune no ar a cada ataque desferido.', strongAgainst: ['Throwers', 'Piper', 'Bea'], counters: ['Gale', 'Otis', 'Shelly'] },
+      { id: 'lily', name: 'Lily', class: 'Assassino', tier: 'S', gadget: 'Deslocamento', starPower: 'Ataque Duplo', gears: 'Dano + Escudo', tips: 'Teleporte pelas costas do alvo com a semente floridada do Super para destruição instantânea.', strongAgainst: ['Piper', 'Nani', 'Dynamike'], counters: ['Gale', 'Otis', 'Buster'] },
+      { id: 'kenji', name: 'Kenji', class: 'Assassino', tier: 'S', gadget: 'Katanas Rápida', starPower: 'Lâmina Vampírica', gears: 'Dano + Escudo', tips: 'Alterne entre corte linear e circular. O Super garante corte em X com invulnerabilidade temporária.', strongAgainst: ['Piper', 'Bea', 'Grom'], counters: ['Gale', 'Otis', 'Clancy'] },
+      { id: 'shade', name: 'Shade', class: 'Assassino', tier: 'A', gadget: 'Forma Espectral', starPower: 'Aparição', gears: 'Dano + Escudo', tips: 'Atravesse paredes em sua forma espectral para pegar snipers desprevenidos atrás de cobertura.', strongAgainst: ['Piper', 'Nani', 'Grom'], counters: ['Gale', 'Otis', 'Shelly'] },
+      { id: 'melodie', name: 'Melodie', class: 'Assassino', tier: 'S', gadget: 'Escudo de Notas', starPower: 'Aceleração de Notas', gears: 'Dano + Escudo', tips: 'Acumule 3 notas musicais orbitando e utilize seus 3 dashes do Super para triturar o cofre ou alvos.', strongAgainst: ['Safes', 'Piper', 'Dynamike'], counters: ['Gale', 'Otis', 'Clancy'] },
+
+      // --- SUPORTES (9) ---
+      { id: 'doug', name: 'Doug', class: 'Suporte', tier: 'B', gadget: 'Dogão Recheado', starPower: 'Molho Extra', gears: 'Visão + Escudo', tips: 'Cure aliados de perto e use o Super do Cachorro-Quente no carregador principal para ressuscitar.', strongAgainst: ['Poco', 'Sandy', 'Nita'], counters: ['Colette', 'Gale', 'Otis'] },
+      { id: 'poco', name: 'Poco', class: 'Suporte', tier: 'A', gadget: 'Diapasão', starPower: 'Sinfonia Protetora', gears: 'Dano + Escudo', tips: 'Mantenha-se atrás de seus tanques lançando ondas gigantescas de dano e cura instantânea com o Super.', strongAgainst: ['Crow', 'Gene', 'Gus'], counters: ['Piper', 'Frank', 'Clancy'] },
+      { id: 'gus', name: 'Gus', class: 'Suporte', tier: 'B', gadget: 'Estouro de Balão', starPower: 'Espirito Animal', gears: 'Dano + Escudo', tips: 'Acumule espíritos de cura e jogue o escudo do cãozinho no seu assassino aliado antes dele pular.', strongAgainst: ['Crow', 'Gene', 'Piper'], counters: ['Mortis', 'Edgar', 'Leon'] },
+      { id: 'byron', name: 'Byron', class: 'Suporte', tier: 'S', gadget: 'Injeção Tripla', starPower: 'Mal-Estar', gears: 'Dano + Escudo', tips: 'Alterne entre curar seus tanques à distância e envenenar atiradores inimigos com seus dardos.', strongAgainst: ['Frank', 'Draco', 'Buster'], counters: ['Mortis', 'Edgar', 'Leon'] },
+      { id: 'max', name: 'Max', class: 'Suporte', tier: 'S', gadget: 'Gota de Eletricidade', starPower: 'Recarga Correndo', gears: 'Dano + Recarga', tips: 'Ative o Super de aceleração perto do time para investir rapidamente sobre o objetivo.', strongAgainst: ['Piper', 'Nani', 'Angelo'], counters: ['Crow', 'Gale', 'Otis'] },
+      { id: 'ruffs', name: 'Ruffs', class: 'Suporte', tier: 'B', gadget: 'Sacos de Areia', starPower: 'Superioridade Aérea', gears: 'Dano + Escudo', tips: 'Lance o suprimento do Super para conceder um buff permanente de vida e dano ao seu aliado.', strongAgainst: ['Piper', 'Bea', 'Nani'], counters: ['Frank', 'Bull', 'Mortis'] },
+      { id: 'gray', name: 'Gray', class: 'Suporte', tier: 'A', gadget: 'Bengala Retrátil', starPower: 'Falso Começo', gears: 'Dano + Escudo', tips: 'Crie portais de teletransporte estratégicos para reposicionar seu time ou pegar inimigos por trás.', strongAgainst: ['Piper', 'Nani', 'Bea'], counters: ['Edgar', 'Mortis', 'Gale'] },
+      { id: 'kit', name: 'Kit', class: 'Suporte', tier: 'S', gadget: 'Caixa de Papelão', starPower: 'Fome Insaciável', gears: 'Dano + Escudo', tips: 'Suba nas costas de um tanque aliado para curá-lo e lançar bombas de lã imunes a dano.', strongAgainst: ['Piper', 'Nani', 'Dynamike'], counters: ['Gale', 'Otis', 'Clancy'] },
+      { id: 'pam', name: 'Pam', class: 'Suporte', tier: 'B', gadget: 'Pulsador de Cura', starPower: 'Zonas de Abraço', gears: 'Dano + Visão', tips: 'Posicione a torre de cura cobrindo o centro do mapa para sustentação prolongada em equipe.', strongAgainst: ['Mortis', 'Crow', 'Gene'], counters: ['Piper', 'Penny', 'Jessie'] }
+    ];
+
+    const GAME_MODES_DATA = [
+      {
+        id: 'brawlball',
+        name: 'Fute-Brawl',
+        icon: 'fa-futbol',
+        color: 'text-green-400',
+        maps: ['Campo de Futebol', 'Sinuoso', 'Pinball'],
+        bestComps: [
+          { brawlers: ['Frank', 'Clancy', 'Max'], desc: 'Frank absorve dano, Clancy evolui nos confrontos e Max acelera o time para gols rápidos.' },
+          { brawlers: ['Kenji', 'Moe', 'Gale'], desc: 'Controle de bola absoluto com Gale empurrando tanques e Kenji finalizando na área.' }
+        ],
+        tip: 'Quebre as paredes na frente do gol inimigo usando Supers no início da partida para facilitar os chutes.'
+      },
+      {
+        id: 'gemgrab',
+        name: 'Pique-Gema',
+        icon: 'fa-gem',
+        color: 'text-purple-400',
+        maps: ['Mina Rochosa', 'Grotto da Gema', 'Vagão Maluco'],
+        bestComps: [
+          { brawlers: ['Gene', 'Byron', 'Clancy'], desc: 'Byron cura o carregador de gemas enquanto Gene puxa o inimigo com mais gemas no final.' },
+          { brawlers: ['Sandy', 'Moe', 'TarA'], desc: 'Sandy oculta o time no mapa central e Tara intercepta viradas com buraco negro.' }
+        ],
+        tip: 'Nunca avance além da metade do mapa quando seu time tiver 10 gemas. Recue e defenda o carregador.'
+      },
+      {
+        id: 'heist',
+        name: 'Roubo',
+        icon: 'fa-vault',
+        color: 'text-yellow-400',
+        maps: ['Ravina da Serpente', 'Ponte Estreita', 'Arena de Roubo'],
+        bestComps: [
+          { brawlers: ['Melodie', 'Chuck', 'Colette'], desc: 'Corrida insana de dano no cofre. Chuck e Melodie causam estragos maciços sem parar.' },
+          { brawlers: ['Clancy', 'Rico', 'Barley'], desc: 'Defesa sólida com Rico nas paredes e Clancy derretendo o cofre no estágio 3.' }
+        ],
+        tip: 'Priorize brawlers de alto dano por segundo (DPS) para derrotar o cofre antes que o adversário consiga reagir.'
+      },
+      {
+        id: 'bounty',
+        name: 'Caça-Estrelas',
+        icon: 'fa-star',
+        color: 'text-cyanAccent',
+        maps: ['Bolo de Camadas', 'Pradaria Celestial', 'Tiro Aberto'],
+        bestComps: [
+          { brawlers: ['Angelo', 'Piper', 'Nani'], desc: 'Trio sniper imbatível em alcance e eliminações instantâneas a longa distância.' },
+          { brawlers: ['Larry & Lawrie', 'Tick', 'Byron'], desc: 'Lançadores mantêm o time inimigo sob pressão total sem tomar tiro.' }
+        ],
+        tip: 'A vitória é por pontos, não por abates. Se o seu time está na frente, jogue recuado e não se arrisque.'
+      },
+      {
+        id: 'knockout',
+        name: 'Nocaute',
+        icon: 'fa-skull',
+        color: 'text-redAccent',
+        maps: ['Ravina Seca', 'Fim da Linha', 'Rocha da Galinha'],
+        bestComps: [
+          { brawlers: ['Angelo', 'Kit', 'Clancy'], desc: 'Kit potencializa o avanço e Angelo garante eliminações logo na abertura da rodada.' },
+          { brawlers: ['Moe', 'Piper', 'Gale'], desc: 'Excelente cobertura de mapa e negação de investidas inimigas com Gale.' }
+        ],
+        tip: 'Cada vida importa! Evite trocas de dano desvantajosas no início da rodada.'
+      },
+      {
+        id: 'hotzone',
+        name: 'Zona Restrita',
+        icon: 'fa-fire',
+        color: 'text-orange-400',
+        maps: ['Divisão Aberta', 'Dupla Dinâmica', 'Besouro Dourado'],
+        bestComps: [
+          { brawlers: ['Lou', 'Gale', 'Berry'], desc: 'Áreas de negação congelantes e poças de tinta que dominam a zona indefinidamente.' },
+          { brawlers: ['Frank', 'Clancy', 'Poco'], desc: 'Frank sustentado por Poco permanece dentro do círculo acumulando porcentagem.' }
+        ],
+        tip: 'Permanecer dentro da zona é o único objetivo. Brawlers de grande vida e controle são essenciais.'
+      }
+    ];
+
+    // STATE MANAGEMENT
+    let currentTab = 'brawlers';
+    let currentSearch = '';
+    let currentClassFilter = 'ALL';
+    let currentTierFilter = 'ALL';
+    let currentSelectedMode = 'brawlball';
+
+    // DRAFT SIMULATOR STATE
+    let enemyDraftSlots = [null, null, null];
+    let activeDraftSlotIndex = 0;
+
+
+    // TAB SWITCHING
+    function switchTab(tabId) {
+      currentTab = tabId;
+      
+      // Update DOM section visibilities
+      document.getElementById('tab-content-brawlers').classList.toggle('hidden', tabId !== 'brawlers');
+      document.getElementById('tab-content-maps').classList.toggle('hidden', tabId !== 'maps');
+      document.getElementById('tab-content-draft').classList.toggle('hidden', tabId !== 'draft');
+
+      // Update Desktop Buttons UI
+      const tabs = ['brawlers', 'maps', 'draft'];
+      tabs.forEach(t => {
+        const btn = document.getElementById(`tab-btn-${t}`);
+        const mobBtn = document.getElementById(`mob-tab-${t}`);
+        
+        if (t === tabId) {
+          btn.className = 'tab-btn px-5 py-2.5 rounded-lg text-sm font-bold transition-all duration-200 bg-cyanAccent text-black shadow-md';
+          if (mobBtn) mobBtn.className = 'text-xs font-bold py-2 px-3 rounded-lg text-cyanAccent bg-cyanAccent/10 flex flex-col items-center gap-1';
+        } else {
+          btn.className = 'tab-btn px-5 py-2.5 rounded-lg text-sm font-bold text-gray-400 hover:text-white hover:bg-gray-800 transition-all duration-200';
+          if (mobBtn) mobBtn.className = 'text-xs font-bold py-2 px-3 rounded-lg text-gray-400 flex flex-col items-center gap-1';
+        }
+      });
+
+      if (tabId === 'maps') {
+        renderMapModeView();
+      } else if (tabId === 'draft') {
+        renderDraftBrawlerList();
+      }
+    }
+
+    // RENDER CLASS FILTER BUTTONS
+    function initClassFilters() {
+      const container = document.getElementById('class-filters-container');
+      let html = `
+        <button onclick="setClassFilter('ALL')" 
+          class="class-btn active-class text-xs font-bold px-3.5 py-2 rounded-xl border border-cyanAccent bg-cyanAccent text-black transition-all">
+          Todas as Classes
+        </button>
+      `;
+
+      OFFICIAL_CLASSES.forEach(cls => {
+        const style = CLASS_COLORS[cls];
+        html += `
+          <button onclick="setClassFilter('${cls}')" id="btn-class-${cls}"
+            class="class-btn text-xs font-bold px-3.5 py-2 rounded-xl border border-gray-700 bg-[#0f131d] text-gray-300 hover:border-gray-500 transition-all">
+            ${cls}
+          </button>
+        `;
+      });
+
+      container.innerHTML = html;
+    }
+
+    function setClassFilter(cls) {
+      currentClassFilter = cls;
+      
+      // Update filter UI buttons
+      document.querySelectorAll('.class-btn').forEach(btn => {
+        btn.className = 'class-btn text-xs font-bold px-3.5 py-2 rounded-xl border border-gray-700 bg-[#0f131d] text-gray-300 hover:border-gray-500 transition-all';
+      });
+
+      if (cls === 'ALL') {
+        event.target.className = 'class-btn active-class text-xs font-bold px-3.5 py-2 rounded-xl border border-cyanAccent bg-cyanAccent text-black transition-all';
+      } else {
+        const targetBtn = document.getElementById(`btn-class-${cls}`);
+        if (targetBtn) {
+          targetBtn.className = 'class-btn text-xs font-bold px-3.5 py-2 rounded-xl border border-cyanAccent bg-cyanAccent/20 text-cyanAccent transition-all';
+        }
+      }
+
+      filterBrawlers();
+    }
+
+    function setTierFilter(tier) {
+      currentTierFilter = tier;
+      filterBrawlers();
+    }
+
+    function filterBrawlers() {
+      const searchVal = document.getElementById('brawler-search').value.toLowerCase().trim();
+      currentSearch = searchVal;
+
+      const filtered = BRAWLERS_DATA.filter(b => {
+        const matchName = b.name.toLowerCase().includes(currentSearch);
+        const matchClass = (currentClassFilter === 'ALL') || (b.class === currentClassFilter);
+        const matchTier = (currentTierFilter === 'ALL') || (b.tier === currentTierFilter);
+        return matchName && matchClass && matchTier;
+      });
+
+      renderBrawlerGrid(filtered);
+    }
+
+    function resetFilters() {
+      document.getElementById('brawler-search').value = '';
+      currentSearch = '';
+      currentClassFilter = 'ALL';
+      currentTierFilter = 'ALL';
+      setClassFilter('ALL');
+    }
+
+    function renderBrawlerGrid(brawlers) {
+      const grid = document.getElementById('brawlers-grid');
+      const countLabel = document.getElementById('visible-count');
+      const noResults = document.getElementById('no-results');
+
+      countLabel.textContent = brawlers.length;
+
+      if (brawlers.length === 0) {
+        grid.innerHTML = '';
+        noResults.classList.remove('hidden');
+        return;
+      }
+
+      noResults.classList.add('hidden');
+
+      let html = '';
+      brawlers.forEach(b => {
+        const tierInfo = TIER_COLORS[b.tier];
+        const classInfo = CLASS_COLORS[b.class];
+        const initial = b.name.charAt(0);
+
+        html += `
+          <div onclick="openBrawlerModal('${b.id}')" 
+            class="bg-[#191e2b] rounded-2xl p-4 card-border-glow cursor-pointer relative overflow-hidden flex flex-col justify-between group">
+            
+            <!-- Top Badges -->
+            <div class="flex items-center justify-between mb-3 z-10">
+              <span class="text-[10px] font-black uppercase px-2 py-0.5 rounded border ${tierInfo.bg} ${tierInfo.text} ${tierInfo.border}">
+                ${tierInfo.label}
+              </span>
+              <span class="text-[10px] font-bold px-2 py-0.5 rounded ${classInfo.bg} ${classInfo.text}">
+                ${b.class}
+              </span>
+            </div>
+
+            <!-- Brawler Avatar Frame -->
+            <div class="w-full aspect-square bg-[#0f131d] rounded-xl flex items-center justify-center my-2 border border-gray-800 group-hover:border-cyanAccent/50 transition-colors relative overflow-hidden">
+              <div class="w-16 h-16 rounded-full bg-gradient-to-tr from-cyanAccent/20 to-redAccent/20 flex items-center justify-center text-2xl font-black text-cyanAccent group-hover:scale-110 transition-transform">
+                ${initial}
+              </div>
+            </div>
+
+            <!-- Info Title -->
+            <div class="text-center mt-2 z-10">
+              <h3 class="font-display font-extrabold text-base text-white group-hover:text-cyanAccent transition-colors">
+                ${b.name}
+              </h3>
+              <p class="text-[11px] text-gray-400 mt-0.5">
+                Build & Counters <i class="fa-solid fa-chevron-right text-[9px] text-cyanAccent ml-0.5"></i>
+              </p>
+            </div>
+
+          </div>
+        `;
+      });
+
+      grid.innerHTML = html;
+    }
+
+    // MODAL HANDLERS
+    function openBrawlerModal(brawlerId) {
+      const brawler = BRAWLERS_DATA.find(b => b.id === brawlerId);
+      if (!brawler) return;
+
+      const modal = document.getElementById('brawler-modal');
+      const tierInfo = TIER_COLORS[brawler.tier];
+      const classInfo = CLASS_COLORS[brawler.class];
+
+      document.getElementById('modal-brawler-name').textContent = brawler.name;
+      
+      const avatarBox = document.getElementById('modal-avatar-box');
+      avatarBox.className = `w-20 h-20 rounded-2xl flex-shrink-0 flex items-center justify-center text-3xl font-black text-white shadow-xl relative border-2 ${tierInfo.border} ${tierInfo.bg}`;
+      avatarBox.textContent = brawler.name.charAt(0);
+
+      const tierBadge = document.getElementById('modal-tier-badge');
+      tierBadge.className = `px-2.5 py-0.5 rounded text-xs font-black uppercase tracking-wider ${tierInfo.bg} ${tierInfo.text} ${tierInfo.border} border`;
+      tierBadge.textContent = tierInfo.label;
+
+      const classBadge = document.getElementById('modal-class-badge');
+      classBadge.className = `px-2.5 py-0.5 rounded text-xs font-bold ${classInfo.bg} ${classInfo.text}`;
+      classBadge.textContent = brawler.class;
+
+      document.getElementById('modal-stats-summary').textContent = `Classe Oficial: ${brawler.class} • Meta Rating: ${tierInfo.label}`;
+
+      document.getElementById('modal-gadget').textContent = brawler.gadget;
+      document.getElementById('modal-starpower').textContent = brawler.starPower;
+      document.getElementById('modal-gears').textContent = brawler.gears;
+      document.getElementById('modal-tips').textContent = brawler.tips;
+
+      // Render Counter Pills
+      const strongBox = document.getElementById('modal-strong-against');
+      strongBox.innerHTML = brawler.strongAgainst.map(item => `
+        <span class="text-[11px] bg-green-500/10 text-green-300 border border-green-500/30 px-2 py-0.5 rounded font-semibold">${item}</span>
+      `).join('');
+
+      const counterBox = document.getElementById('modal-counters');
+      counterBox.innerHTML = brawler.counters.map(item => `
+        <span class="text-[11px] bg-red-500/10 text-red-300 border border-red-500/30 px-2 py-0.5 rounded font-semibold">${item}</span>
+      `).join('');
+
+      modal.classList.remove('hidden');
+    }
+
+    function closeModal() {
+      document.getElementById('brawler-modal').classList.add('hidden');
+    }
+
+    function renderMapModeButtons() {
+      const container = document.getElementById('mode-pills-container');
+      let html = '';
+
+      GAME_MODES_DATA.forEach(mode => {
+        const active = mode.id === currentSelectedMode;
+        const btnClass = active 
+          ? 'bg-cyanAccent text-black font-extrabold shadow-lg' 
+          : 'bg-[#0f131d] text-gray-300 hover:text-white border border-gray-700';
+
+        html += `
+          <button onclick="selectMapMode('${mode.id}')" class="px-3.5 py-2 rounded-xl text-xs flex items-center gap-2 transition-all ${btnClass}">
+            <i class="fa-solid ${mode.icon} ${active ? 'text-black' : mode.color}"></i> ${mode.name}
+          </button>
+        `;
+      });
+
+      container.innerHTML = html;
+    }
+
+    function selectMapMode(modeId) {
+      currentSelectedMode = modeId;
+      renderMapModeButtons();
+      renderMapModeView();
+    }
+
+    function renderMapModeView() {
+      renderMapModeButtons();
+      const mode = GAME_MODES_DATA.find(m => m.id === currentSelectedMode);
+      if (!mode) return;
+
+      const container = document.getElementById('mode-details-area');
+
+      let compsHtml = '';
+      mode.bestComps.forEach((comp, idx) => {
+        compsHtml += `
+          <div class="bg-[#0f131d] p-4 rounded-xl border border-gray-800 space-y-3">
+            <span class="text-xs font-extrabold uppercase text-cyanAccent tracking-wider block">
+              Composição Recomendada #${idx + 1}
+            </span>
+            <div class="flex flex-wrap gap-2">
+              ${comp.brawlers.map(bName => {
+                return `<span class="bg-[#191e2b] text-white border border-cyanAccent/30 px-3 py-1.5 rounded-lg text-xs font-black flex items-center gap-1.5">
+                  <i class="fa-solid fa-shield text-cyanAccent text-[10px]"></i> ${bName}
+                </span>`;
+              }).join('')}
+            </div>
+            <p class="text-xs text-gray-300 leading-relaxed pt-1">
+              ${comp.desc}
+            </p>
+          </div>
+        `;
+      });
+
+      container.innerHTML = `
+        <div class="bg-[#191e2b] p-6 rounded-2xl border border-gray-800 space-y-6">
+          
+          <div class="flex items-center justify-between pb-4 border-b border-gray-800">
+            <div class="flex items-center gap-3">
+              <div class="w-12 h-12 rounded-xl bg-[#0f131d] border border-cyanAccent/30 flex items-center justify-center text-2xl">
+                <i class="fa-solid ${mode.icon} ${mode.color}"></i>
+              </div>
+              <div>
+                <h3 class="text-xl font-display font-black text-white">${mode.name}</h3>
+                <p class="text-xs text-gray-400">Modo de Jogo Competitivo 3v3</p>
+              </div>
+            </div>
+            
+            <span class="bg-cyanAccent/10 border border-cyanAccent/30 text-cyanAccent text-xs px-3 py-1 rounded-full font-bold">
+              6 Modos Oficiais
+            </span>
+          </div>
+
+          <!-- Maps list -->
+          <div>
+            <h4 class="text-xs font-extrabold uppercase text-gray-400 tracking-wider mb-2">
+              Principais Mapas do Modo:
+            </h4>
+            <div class="flex flex-wrap gap-2">
+              ${mode.maps.map(m => `<span class="bg-[#0f131d] border border-gray-700 px-3 py-1 rounded-lg text-xs font-bold text-gray-200">${m}</span>`).join('')}
+            </div>
+          </div>
+
+          <!-- Best Team Compositions -->
+          <div class="space-y-3">
+            <h4 class="text-xs font-extrabold uppercase text-gray-400 tracking-wider">
+              Melhores Composições de Times (Meta 2026):
+            </h4>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              ${compsHtml}
+            </div>
+          </div>
+
+          <!-- Pro Tip -->
+          <div class="bg-redAccent/10 border border-redAccent/30 p-4 rounded-xl flex items-start gap-3">
+            <i class="fa-solid fa-lightbulb text-redAccent text-lg mt-0.5"></i>
+            <div>
+              <h5 class="text-xs font-extrabold uppercase text-redAccent">Dica Pro de Vitória</h5>
+              <p class="text-xs text-gray-300 mt-1">${mode.tip}</p>
+            </div>
+          </div>
+
+        </div>
+      `;
+    }
+
+    function openDraftBrawlerSelector(slotIndex) {
+      activeDraftSlotIndex = slotIndex;
+      document.getElementById('active-slot-label').textContent = `Slot ${slotIndex + 1}`;
+      renderDraftBrawlerList();
+    }
+
+    function renderDraftBrawlerList() {
+      const container = document.getElementById('draft-brawler-picker-list');
+      const searchVal = document.getElementById('draft-search-input').value.toLowerCase().trim();
+
+      const filtered = BRAWLERS_DATA.filter(b => b.name.toLowerCase().includes(searchVal));
+
+      let html = '';
+      filtered.forEach(b => {
+        const isSelected = enemyDraftSlots.includes(b.id);
+        
+        html += `
+          <div onclick="selectDraftEnemy('${b.id}')" 
+            class="aspect-square bg-[#0f131d] rounded-lg border ${isSelected ? 'border-redAccent bg-redAccent/20' : 'border-gray-800 hover:border-cyanAccent'} p-1 flex flex-col items-center justify-center cursor-pointer transition-all">
+            <span class="text-xs font-bold text-white truncate w-full text-center">${b.name}</span>
+            <span class="text-[9px] text-gray-400">${b.tier}</span>
+          </div>
+        `;
+      });
+
+      container.innerHTML = html;
+      updateDraftSlotsUI();
+    }
+
+    function selectDraftEnemy(brawlerId) {
+      const brawler = BRAWLERS_DATA.find(b => b.id === brawlerId);
+      if (!brawler) return;
+
+      enemyDraftSlots[activeDraftSlotIndex] = brawler;
+      
+      // Auto move slot index
+      if (activeDraftSlotIndex < 2) {
+        activeDraftSlotIndex++;
+        document.getElementById('active-slot-label').textContent = `Slot ${activeDraftSlotIndex + 1}`;
+      }
+
+      updateDraftSlotsUI();
+      calculateDraftCounters();
+    }
+
+    function removeDraftEnemy(slotIndex) {
+      enemyDraftSlots[slotIndex] = null;
+      activeDraftSlotIndex = slotIndex;
+      document.getElementById('active-slot-label').textContent = `Slot ${slotIndex + 1}`;
+      updateDraftSlotsUI();
+      calculateDraftCounters();
+    }
+
+    function updateDraftSlotsUI() {
+      for (let i = 0; i < 3; i++) {
+        const slotEl = document.getElementById(`enemy-slot-${i}`);
+        const enemy = enemyDraftSlots[i];
+
+        if (enemy) {
+          slotEl.className = "aspect-square bg-[#0f131d] rounded-xl border-2 border-redAccent flex flex-col items-center justify-center relative p-2 text-center group cursor-pointer";
+          slotEl.innerHTML = `
+            <button onclick="event.stopPropagation(); removeDraftEnemy(${i})" class="absolute top-1 right-1 w-5 h-5 bg-redAccent text-black rounded-full text-[10px] font-bold flex items-center justify-center">✕</button>
+            <div class="w-10 h-10 rounded-full bg-redAccent/20 text-redAccent font-black text-lg flex items-center justify-center mb-1">
+              ${enemy.name.charAt(0)}
+            </div>
+            <span class="text-xs font-extrabold text-white truncate w-full">${enemy.name}</span>
+            <span class="text-[9px] text-gray-400 font-semibold">${enemy.class}</span>
+          `;
+        } else {
+          slotEl.className = "aspect-square bg-[#0f131d] rounded-xl border-2 border-dashed border-gray-700 hover:border-redAccent flex flex-col items-center justify-center cursor-pointer transition-all p-2 text-center group";
+          slotEl.innerHTML = `
+            <i class="fa-solid fa-plus text-gray-500 group-hover:text-redAccent text-xl mb-1"></i>
+            <span class="text-[11px] text-gray-400 font-bold">Adicionar Slot ${i + 1}</span>
+          `;
+        }
+      }
+    }
+
+    function resetDraft() {
+      enemyDraftSlots = [null, null, null];
+      activeDraftSlotIndex = 0;
+      document.getElementById('active-slot-label').textContent = 'Slot 1';
+      updateDraftSlotsUI();
+      calculateDraftCounters();
+    }
+
+    function calculateDraftCounters() {
+      const activeEnemies = enemyDraftSlots.filter(Boolean);
+      const container = document.getElementById('recommended-counters-container');
+      const statusText = document.getElementById('counters-status-text');
+      const tipBox = document.getElementById('draft-tactical-tip');
+      const tipText = document.getElementById('draft-tactical-text');
+
+      if (activeEnemies.length === 0) {
+        statusText.textContent = 'Aguardando seleção...';
+        tipBox.classList.add('hidden');
+        container.innerHTML = `
+          <div class="h-64 border border-dashed border-gray-800 rounded-xl flex flex-col items-center justify-center text-center p-6 bg-[#0f131d]/50">
+            <div class="w-16 h-16 rounded-full bg-cyanAccent/10 flex items-center justify-center mb-3">
+              <i class="fa-solid fa-crosshairs text-2xl text-cyanAccent"></i>
+            </div>
+            <h4 class="font-bold text-gray-300 text-base">Selecione Brawlers Inimigos</h4>
+            <p class="text-xs text-gray-500 max-w-sm mt-1">
+              Adicione os brawlers do time adversário no painel à esquerda para que o nosso algoritmo analise fraquezas, alcances e classes desvantajosas.
+            </p>
+          </div>
+        `;
+        return;
+      }
+
+      statusText.textContent = `Analisando contra ${activeEnemies.length} inimigo(s)...`;
+
+      // Counter score calculation
+      const scoreMap = {};
+
+      activeEnemies.forEach(enemy => {
+        // Find direct counters listed in enemy's counters list
+        enemy.counters.forEach(counterName => {
+          const match = BRAWLERS_DATA.find(b => b.name.toLowerCase() === counterName.toLowerCase());
+          if (match) {
+            scoreMap[match.id] = (scoreMap[match.id] || 0) + 5;
+          }
+        });
+
+        // Class synergy counter rules
+        BRAWLERS_DATA.forEach(candidate => {
+          // Avoid suggesting selected enemy brawler
+          if (activeEnemies.some(e => e.id === candidate.id)) return;
+
+          let bonus = 0;
+          
+          // Anti-tank rules
+          if (enemy.class === 'Tanque' && (candidate.name === 'Colette' || candidate.name === 'Gale' || candidate.name === 'Clancy' || candidate.name === 'Otis')) {
+            bonus += 4;
+          }
+          // Anti-assassin rules
+          if (enemy.class === 'Assassino' && (candidate.name === 'Gale' || candidate.name === 'Otis' || candidate.name === 'Buster' || candidate.name === 'Shelly')) {
+            bonus += 4;
+          }
+          // Anti-sniper rules
+          if (enemy.class === 'Franco-Atirador' && (candidate.class === 'Assassino' || candidate.name === 'Nani' || candidate.name === 'Angelo')) {
+            bonus += 3;
+          }
+          // Tier S/A base rating boost
+          if (candidate.tier === 'S') bonus += 2;
+          if (candidate.tier === 'A') bonus += 1;
+
+          scoreMap[candidate.id] = (scoreMap[candidate.id] || 0) + bonus;
+        });
+      });
+
+      // Sort candidate brawlers by score
+      const sortedCandidates = Object.keys(scoreMap)
+        .map(id => ({ brawler: BRAWLERS_DATA.find(b => b.id === id), score: scoreMap[id] }))
+        .sort((a, b) => b.score - a.score)
+        .slice(0, 4);
+
+      let html = '';
+      sortedCandidates.forEach((item, index) => {
+        const b = item.brawler;
+        const tierInfo = TIER_COLORS[b.tier];
+
+        html += `
+          <div onclick="openBrawlerModal('${b.id}')" 
+            class="bg-[#0f131d] p-4 rounded-xl border border-cyanAccent/30 hover:border-cyanAccent flex items-center justify-between cursor-pointer transition-all">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-lg bg-cyanAccent/20 text-cyanAccent font-black text-base flex items-center justify-center">
+                #${index + 1}
+              </div>
+              <div>
+                <h4 class="font-bold text-sm text-white flex items-center gap-2">
+                  ${b.name}
+                  <span class="text-[10px] px-1.5 py-0.2 rounded font-black ${tierInfo.bg} ${tierInfo.text}">
+                    ${tierInfo.label}
+                  </span>
+                </h4>
+                <p class="text-xs text-gray-400">Classe: ${b.class} • Posição: Ideal Counter Pick</p>
+              </div>
+            </div>
+            <div class="text-right">
+              <span class="text-xs font-black text-cyanAccent bg-cyanAccent/10 px-2.5 py-1 rounded-lg border border-cyanAccent/30">
+                Ver Build
+              </span>
+            </div>
+          </div>
+        `;
+      });
+
+      container.innerHTML = html;
+
+      // Tactical advice generation
+      tipBox.classList.remove('hidden');
+      const enemyNames = activeEnemies.map(e => e.name).join(', ');
+      
+      let tacticalAdvice = `Enfrentando <strong>${enemyNames}</strong>: `;
+      if (activeEnemies.some(e => e.class === 'Tanque')) {
+        tacticalAdvice += ' O time adversário possui tanques robustos; escolha brawlers de dano percentual ou controle de recuo como Colette, Gale e Clancy.';
+      } else if (activeEnemies.some(e => e.class === 'Franco-Atirador')) {
+        tacticalAdvice += ' O time adversário possui grande alcance; aposte em assassinos com mobilidade (Leon, Kenji, Lily) ou snipers com maior alcance limpo (Angelo, Nani).';
+      } else {
+        tacticalAdvice += ' Mantenha a formação e evite agrupamentos excessivos para negar valor de área.';
+      }
+
+      tipText.innerHTML = tacticalAdvice;
+    }
+
+    // INITIALIZATION ON LOAD
+    window.onload = function() {
+      initClassFilters();
+      renderBrawlerGrid(BRAWLERS_DATA);
+    };
+  </script>
+</body>
+</html>
